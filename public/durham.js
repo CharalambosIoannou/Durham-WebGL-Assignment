@@ -1,5 +1,26 @@
 // Directional lighting demo: By Frederick Li
 // Vertex shader program
+/*
+function loadJSON(callback) {   
+
+  var xobj = new XMLHttpRequest();
+      xobj.overrideMimeType("application/json");
+  xobj.open('GET', 'dragon.json', true); // Replace 'my_data' with the path to your file
+  xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+          // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+          callback(xobj.responseText);
+        }
+  };
+  xobj.send(null);  
+}
+
+loadJSON(function(response) {
+  actual_JSON= JSON.parse(response);
+  console.log(actual_JSON);
+
+});
+*/
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
   'attribute vec4 a_Color;\n' +
@@ -37,8 +58,9 @@ var FSHADER_SOURCE =
   '#endif\n' +
   'varying vec4 v_Color;\n' +
   'varying vec2 v_TextureCoord;\n' +
+  'uniform vec4 u_color;\n'+
   'uniform sampler2D u_Sampler; \n' +
-  'void main() {\n' +
+  'void main() {\n' + 
   '   gl_FragColor = texture2D(u_Sampler, v_TextureCoord);\n' +
   '}\n';
 
@@ -51,7 +73,10 @@ var ANGLE_STEP = 3.0;  // The increments of rotation angle (degrees)
 var g_xAngle = 0.0;    // The rotation x angle (degrees)
 var g_yAngle = 0.0;    // The rotation y angle (degrees)
 
+
 function main() {
+
+
   // Retrieve <canvas> element
   var canvas = document.getElementById('webgl');
 
@@ -87,7 +112,6 @@ function main() {
   var u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
   var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
   var u_LightDirection = gl.getUniformLocation(gl.program, 'u_LightDirection');
-  //var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
 
 
 
@@ -145,7 +169,9 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 }
 
 
-function initVertexBuffers(gl) {
+
+
+function ground(gl) {
   // Create a cube
   //    v6----- v5
   //   /|      /|
@@ -195,25 +221,6 @@ function initVertexBuffers(gl) {
 ]);
 
 
-var vertices1 = new Float32Array([   // Coordinates
-  0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, // v0-v1-v2-v3 front
-  0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, // v0-v3-v4-v5 right
-  0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, // v0-v5-v6-v1 up
- -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, // v1-v6-v7-v2 left
- -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, // v7-v4-v3-v2 down
-  0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  // v4-v7-v6-v5 back
-]);
-
-
-var indices1 = new Uint8Array([
-  0, 1, 2,   0, 2, 3,    // front
-  4, 5, 6,   4, 6, 7,    // right
-  8, 9,10,   8,10,11,    // up
- 12,13,14,  12,14,15,    // left
- 16,17,18,  16,18,19,    // down
- 20,21,22,  20,22,23     // back
-])
-
 
 
   const textureCoordBuffer = gl.createBuffer();
@@ -257,6 +264,99 @@ var indices1 = new Uint8Array([
 
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextCoordBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW);
+  
+
+  return indices.length;
+}
+
+function greyCube(gl) {
+  // Create a cube
+  //    v6----- v5
+  //   /|      /|
+  //  v1------v0|
+  //  | |     | |
+  //  | |v7---|-|v4
+  //  |/      |/
+  //  v2------v3
+  var vertices = new Float32Array([   // Coordinates
+     0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, // v0-v1-v2-v3 front
+     0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, // v0-v3-v4-v5 right
+     0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, // v0-v5-v6-v1 up
+    -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, // v1-v6-v7-v2 left
+    -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, // v7-v4-v3-v2 down
+     0.5,-0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5, 0.5,-0.5,   0.5, 0.5,-0.5  // v4-v7-v6-v5 back
+  ]);
+
+
+  var colors = new Float32Array([    // Colors
+    0.5, 0.5, 0.5,   0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  // v0-v1-v2-v3 front 
+    0.5, 0.5, 0.5,   0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  0.5, 0.5, 0.5,     // v0-v3-v4-v5 right
+    0.5, 0.5, 0.5,   0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  0.5, 0.5, 0.5,     // v0-v5-v6-v1 up
+    0.5, 0.5, 0.5,   0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  0.5, 0.5, 0.5,    // v1-v6-v7-v2 left
+    0.5, 0.5, 0.5,   0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  0.5, 0.5, 0.5,    // v7-v4-v3-v2 down
+    0.5, 0.5, 0.5,   0.5, 0.5, 0.5,  0.5, 0.5, 0.5,  0.5, 0.5, 0.5    // v4-v7-v6-v5 back
+ ]);
+
+
+  var normals = new Float32Array([    // Normal
+    0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
+    1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
+    0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
+   -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+    0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
+    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
+  ]);
+
+
+  // Indices of the vertices
+  var indices = new Uint8Array([
+     0, 1, 2,   0, 2, 3,    // front
+     4, 5, 6,   4, 6, 7,    // right
+     8, 9,10,   8,10,11,    // up
+    12,13,14,  12,14,15,    // left
+    16,17,18,  16,18,19,    // down
+    20,21,22,  20,22,23     // back
+ ]);
+
+ const textureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+  var textureCoordinates = new Float32Array([  
+	1.0, 1.0,	1.0, 1.0,	1.0, 1.0,	1.0, 1.0, //front 
+	1.0, 1.0,	1.0, 1.0,	1.0, 1.0,	1.0, 1.0, //right
+	1.0, 1.0,	1.0, 1.0,	1.0, 1.0,	1.0, 1.0, //top
+	1.0, 1.0,	1.0, 1.0,	1.0, 1.0,	1.0, 1.0, //left
+	1.0, 1.0,	1.0, 1.0,	1.0, 1.0,	1.0, 1.0, //bottom
+	1.0, 1.0,	1.0, 1.0,	1.0, 1.0,	1.0, 1.0, //back
+  ]);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl.STATIC_DRAW);
+
+
+  // Write the vertex property to buffers (coordinates, colors and normals)
+  if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
+  if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
+  if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
+  if (!initArrayBuffer(gl, 'a_TextureCoord', textureCoordinates, 2, gl.FLOAT)) return -1;
+  
+
+  // Write the indices to the buffer object
+  var indexBuffer = gl.createBuffer();
+  if (!indexBuffer) {
+    console.log('Failed to create the buffer object');
+    return false;
+  }
+
+  var vertexTextCoordBuffer = gl.createBuffer();
+  if(!vertexTextCoordBuffer){
+    console.log("Failed to create the buffer object");
+    return false;
+  }
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, textureCoordinates, gl.STATIC_DRAW);
+  
 
   return indices.length;
 }
@@ -296,8 +396,8 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
   gl.uniform1i(u_isLighting, true); // Will apply lighting
 
-  // Set the vertex coordinates and color (for the cube)
-  var n = initVertexBuffers(gl);
+  // CREATE GROUND
+  var n = ground(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
     return;
@@ -315,15 +415,20 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
-  /*
+
+  //CREATE WALL
+  var n1 = greyCube(gl);
+  if (n1 < 0) {
+    console.log('Failed to set the vertex information');
+    return;
+  }
 
   pushMatrix(modelMatrix);
-    modelMatrix.translate(2, -1.75, 1.5); 
-    modelMatrix.scale(0.4, 0.3, 0.3); // Scale
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix.translate(-1, 0.5, -1.5);
+    modelMatrix.scale(1, 1, 0.01); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n1);
   modelMatrix = popMatrix();
 
-*/
 }
 var g_matrixStack = []; // Array for storing a matrix
 function pushMatrix(m) { // Store the specified matrix to the array
@@ -364,17 +469,8 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
   image.onload = function() {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-      gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-    // WebGL1 has different requirements for power of 2 images
-    // vs non power of 2 images so check if the image is a
-    // power of 2 in both dimensions.
-   
-       // No, it's not a power of 2. Turn off mips and set
-       // wrapping to clamp to edge
-     //  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                  gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     
   };
   image.src = "textures/test.jpg";
