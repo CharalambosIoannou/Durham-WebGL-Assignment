@@ -37,6 +37,8 @@ var FSHADER_SOURCE =
   '  gl_FragColor = v_Color;\n' +
   '}\n';
 
+
+
 var modelMatrix = new Matrix4(); // The model matrix
 var viewMatrix = new Matrix4();  // The view matrix
 var projMatrix = new Matrix4();  // The projection matrix
@@ -45,6 +47,9 @@ var g_normalMatrix = new Matrix4();  // Coordinate transformation matrix for nor
 var ANGLE_STEP = 3.0;  // The increments of rotation angle (degrees)
 var g_xAngle = 0.0;    // The rotation x angle (degrees)
 var g_yAngle = 0.0;    // The rotation y angle (degrees)
+
+
+
 
 function main() {
   // Retrieve <canvas> element
@@ -141,16 +146,22 @@ function greyCube(gl) {
   //  | |v7---|-|v4
   //  |/      |/
   //  v2------v3
-  var vertices = new Float32Array([  1,-1,-1,-1,-1,1,-1,-1,-1,-1,1,-1,0.999999,1,1,1,1,-1,1,1,-1,1,-1,1,1,-1,-1,0.999999,1,1,-1,-1,1,1,-1,1,-1,-1,1,-1,1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,1,1,-1,1,-1,-1,1,-1,1,-1,-1,1,-1,1,-1,-1,1,1,0.999999,1,1,1,1,-1,0.999999,1,1,1,-1,1,0.999999,1,1,-1,1,1,-1,-1,1,-1,-1,1,-1,1,1,-1,1,-1,1,-1,-1,-1,-1,-1,-1,1,-1]);
-
+  var vertices = new Float32Array([ 
+    0.5, 0.5, 0.5,  -0.5, 0.5, 0.5,  -0.5,-0.5, 0.5,   0.5,-0.5, 0.5, // v0-v1-v2-v3 front
+    0.5, 0.5, 0.5,   0.5,-0.5, 0.5,   0.5,-0.5,-0.5,   0.5, 0.5,-0.5, // v0-v3-v4-v5 right
+    0.5, 0.5, 0.5,   0.5, 0.5,-0.5,  -0.5, 0.5,-0.5,  -0.5, 0.5, 0.5, // v0-v5-v6-v1 up
+   -0.5, 0.5, 0.5,  -0.5, 0.5,-0.5,  -0.5,-0.5,-0.5,  -0.5,-0.5, 0.5, // v1-v6-v7-v2 left
+   -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5, // v7-v4-v3-v2 down
+    0.5,-0.5,-0.5, -0.5,-0.5,-0.5, -0.5, 0.5,-0.5, 0.5, 0.5,-0.5 // v4-v7-v6-v5 back
+  ]);
 
   var colors = new Float32Array([    // Colors
-    0.3, 0.3, 0.3,   0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  // v0-v1-v2-v3 front 
-    0.3, 0.3, 0.3,   0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  0.3, 0.3, 0.3,     // v0-v3-v4-v5 right
-    0.3, 0.3, 0.3,   0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  0.3, 0.3, 0.3,     // v0-v5-v6-v1 up
-    0.3, 0.3, 0.3,   0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  0.3, 0.3, 0.3,    // v1-v6-v7-v2 left
-    0.3, 0.3, 0.3,   0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  0.3, 0.3, 0.3,    // v7-v4-v3-v2 down
-    0.3, 0.3, 0.3,   0.3, 0.3, 0.3,  0.3, 0.3, 0.3,  0.3, 0.3, 0.3　    // v4-v7-v6-v5 back
+    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v0-v1-v2-v3 front
+    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v0-v3-v4-v5 right
+    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v0-v5-v6-v1 up
+    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v1-v6-v7-v2 left
+    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v7-v4-v3-v2 down
+    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,　 // v4-v7-v6-v5 back
  ]);
 
 
@@ -160,7 +171,7 @@ function greyCube(gl) {
     0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
    -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
     0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
-    0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
+0.0, 0.0,-1.0, 0.0, 0.0,-1.0, 0.0, 0.0,-1.0, 0.0, 0.0,-1.0 // v4-v7-v6-v5 back
   ]);
 
 
@@ -396,7 +407,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
   pushMatrix(modelMatrix);
     modelMatrix.translate(0, -2, 0);
-    modelMatrix.scale(8, 0.05, 8); 
+    modelMatrix.scale(7.5, 0.05, 8); 
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
@@ -408,10 +419,13 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   }
 
   pushMatrix(modelMatrix);
-    modelMatrix.translate(-1.85, -1.5, -2.8);
-    modelMatrix.scale(2, 1, 0.05); // Scale
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
+  modelMatrix.translate(-3.5, -0.8, -2.45);
+  modelMatrix.scale(0.08, 2.1, 3); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+
+  
 
 
 
