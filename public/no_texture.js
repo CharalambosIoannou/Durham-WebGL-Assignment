@@ -124,10 +124,10 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     case 38: // Down arrow key -> the negative rotation of arm1 around the y-axis
       g_xAngle = (g_xAngle - ANGLE_STEP) % 360;
       break;
-    case 39: // Right arrow key -> the positive rotation of arm1 around the y-axis
+    case 37: // Right arrow key -> the positive rotation of arm1 around the y-axis
       g_yAngle = (g_yAngle + ANGLE_STEP) % 360;
       break;
-    case 37: // Left arrow key -> the negative rotation of arm1 around the y-axis
+    case 39: // Left arrow key -> the negative rotation of arm1 around the y-axis
       g_yAngle = (g_yAngle - ANGLE_STEP) % 360;
       break;
     default: return; // Skip drawing at no effective action
@@ -420,6 +420,17 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     return;
   }
 
+
+
+
+
+  
+  /*Start of building 1 */
+
+
+
+
+
   //Base of building 1 (big one)
   pushMatrix(modelMatrix);
   modelMatrix.translate(-1.08, -1.8 , -2);
@@ -527,35 +538,124 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
 
  //Roof Back part
   pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.1, 4.07, -3.3);
+  modelMatrix.translate(-1.08, 4.18, -3.17);
   modelMatrix.rotate(90,0,0,1);
   modelMatrix.rotate(45,0,1,0);
-  modelMatrix.scale(0.06, 9.3, 2); // Scale
+  modelMatrix.scale(0.06, 9.3, 2.26); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   //Roof Front part
   pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.1, 4.07, 1);
+  modelMatrix.translate(-1.08, 4.18, -1.57);
   modelMatrix.rotate(90,0,0,1);
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(180,1,0,0);
-  modelMatrix.scale(0.06, 9.3, 2); // Scale
+  modelMatrix.rotate(45,0,-1,0);
+  modelMatrix.scale(0.06, 9.3, 2.26); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
+
+  //Cover upper part of roof
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.97, -2.37);
+  modelMatrix.rotate(90,0,0,1);
+  modelMatrix.scale(0.06, 9.3, 0.05); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Gap between windows 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 3.17, -0.79);
+  modelMatrix.scale(9.03, 0.5, 0.05); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Gap between windows 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 1.6, -0.79);
+  modelMatrix.scale(9.03, 0.5, 0.05); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Gap between windows 3
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 0, -0.79);
+  modelMatrix.scale(9.03, 0.5, 0.05); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+
+
+
         
+    /*Start of building 2 */
+
 
 
 
   //Base of building 2 (small one)
   pushMatrix(modelMatrix);
-  modelMatrix.translate(4.65, -1.93 , -1.5);
-  modelMatrix.scale(2.1, 0.1, 5); // Scale
+  modelMatrix.translate(4.65, -1.93 , -0.98);
+  modelMatrix.scale(2.1, 0.1, 6); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+  //Left horizontal wall of building 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.7, -0.30 , -0.98);
+  modelMatrix.scale(0.08, 0.8, 6); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
-  
+  //Left vertical wall 1 of building 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.7, -0.9 , 0.7);
+  modelMatrix.scale(0.08, 2, 0.5); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Left vertical wall 2 of building 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.7, -0.9 , 1.9);
+  modelMatrix.scale(0.08, 2, 0.2); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Left vertical wall 3 of building 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.7, -0.9 , -2.27);
+  modelMatrix.scale(0.08, 2, 3.45); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Right wall of building 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(5.66, -0.9 , -0.98);
+  modelMatrix.scale(0.08, 2, 6); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Back wall of building 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(4.65, -0.9 , -3.95);
+  modelMatrix.scale(2, 2, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Roof left part
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(4.20, 0.69 , -0.98);
+  modelMatrix.rotate(140,0,0,1);
+  modelMatrix.scale(0.08, 1.55, 6); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();  
+
+  //Roof right part
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(5.16, 0.69 , -0.98);
+  modelMatrix.rotate(-140,0,0,1);
+  modelMatrix.scale(0.08, 1.55, 6); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix(); 
 
 
 
