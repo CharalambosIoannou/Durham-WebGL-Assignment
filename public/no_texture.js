@@ -102,7 +102,7 @@ function main() {
 
   // Calculate the view matrix and the projection matrix
   viewMatrix.setLookAt(0, 0, 15, 0, 0, -100, 0, 1, 0);
-  projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
+  projMatrix.setPerspective(45, canvas.width/canvas.height, 1, 100);
   // Pass the model, view, and projection matrix to the uniform variable respectively
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
@@ -113,6 +113,7 @@ function main() {
   };
 
   draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting);
+      
 }
 
 function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
@@ -156,12 +157,12 @@ function greyCube(gl) {
   ]);
 
   var colors = new Float32Array([    // Colors
-    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v0-v1-v2-v3 front
-    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v0-v3-v4-v5 right
-    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v0-v5-v6-v1 up
-    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v1-v6-v7-v2 left
-    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,    // v7-v4-v3-v2 down
-    1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,　 // v4-v7-v6-v5 back
+    0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,    // v0-v1-v2-v3 front
+    0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,    // v0-v3-v4-v5 right
+    0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,    // v0-v5-v6-v1 up
+    0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,    // v1-v6-v7-v2 left
+    0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,    // v7-v4-v3-v2 down
+    0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,   0.5019,0.5019,0.5019,　 // v4-v7-v6-v5 back
  ]);
 
 
@@ -405,9 +406,10 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     return;
   }
 
+  //Ground
   pushMatrix(modelMatrix);
     modelMatrix.translate(0, -2, 0);
-    modelMatrix.scale(7.5, 0.05, 8); 
+    modelMatrix.scale(11.5, 0.05, 8); 
     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
@@ -418,11 +420,139 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
     return;
   }
 
+  //Base of building 1 (big one)
   pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.5, -0.8, -2.45);
-  modelMatrix.scale(0.08, 2.1, 3); // Scale
+  modelMatrix.translate(-1.08, -1.8 , -2);
+  modelMatrix.scale(9.3, 0.4, 4); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
+  modelMatrix = popMatrix();
+
+  //First step from top
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-2.07, -1.75, 0.2);
+  modelMatrix.scale(1, 0.09, 0.5); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Second step from top
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-2.07, -1.84, 0.2);
+  modelMatrix.scale(1, 0.09, 0.7); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Third step
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-2.07, -1.93, 0.2);
+  modelMatrix.scale(1, 0.09, 0.9); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Left wall 
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-5.69, 0.9, -2.4);
+  modelMatrix.scale(0.08, 5, 3.2); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Back wall
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.1, 0.9, -3.96);
+  modelMatrix.scale(9.2, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Right wall
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.53, 0.9, -2.4);
+  modelMatrix.scale(0.08, 5, 3.2); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-5.53, 0.9, -0.8);
+  modelMatrix.scale(0.4, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-4.19, 0.9, -0.8);
+  modelMatrix.scale(0.5, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 3
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-2.90, 0.9, -0.8);
+  modelMatrix.scale(0.5, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 4
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.61, 0.9, -0.8);
+  modelMatrix.scale(0.5, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 5
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-0.32, 0.9, -0.8);
+  modelMatrix.scale(0.5, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 6
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(0.97, 0.9, -0.8);
+  modelMatrix.scale(0.5, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 7
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.25, 0.9, -0.8);
+  modelMatrix.scale(0.5, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Front wall 8
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.37, 0.9, -0.8);
+  modelMatrix.scale(0.4, 5, 0.08); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+ //Roof Back part
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.1, 4.07, -3.3);
+  modelMatrix.rotate(90,0,0,1);
+  modelMatrix.rotate(45,0,1,0);
+  modelMatrix.scale(0.06, 9.3, 2); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //Roof Front part
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.1, 4.07, 1);
+  modelMatrix.rotate(90,0,0,1);
+  modelMatrix.rotate(120,0,1,0);
+  modelMatrix.rotate(180,1,0,0);
+  modelMatrix.scale(0.06, 9.3, 2); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+        
+
+
+
+  //Base of building 2 (small one)
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(4.65, -1.93 , -1.5);
+  modelMatrix.scale(2.1, 0.1, 5); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
 
   
