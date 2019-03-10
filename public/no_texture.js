@@ -46,14 +46,11 @@ var FSHADER_SOURCE =
   'varying vec3 v_Normal;\n' +
   'varying vec3 v_Position;\n' +
   'varying vec4 v_Color;\n' +
-  'uniform sampler2D u_Sampler0;\n' +
-  'uniform sampler2D u_Sampler1;\n' +
+  'uniform sampler2D u_Sampler;\n' +
   'varying vec2 v_TexCoords;\n' +
   'void main() {\n' +
   'if (u_UseTextures) {\n' +
-  '  vec4 color0 = texture2D(u_Sampler0, v_TexCoords);\n' +
-  '  vec4 color1 = texture2D(u_Sampler1, v_TexCoords);\n' +
-  '     gl_FragColor = color0 * color1;\n' +
+  '     gl_FragColor = texture2D(u_Sampler, v_TexCoords);\n' +
   '  } else {\n' +
   '  gl_FragColor = v_Color;\n' +
   '  }\n' +
@@ -510,32 +507,28 @@ function ground(gl) {
 
 
   function initArrayBuffer (gl, attribute, data, num, type) {
- // Create a buffer object
- var buffer = gl.createBuffer();
- if (!buffer) {
-   console.log('Failed to create the buffer object');
-   return false;
- }
- 
- // Write date into the buffer object
- gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
- gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
- 
- // Element size
- var FSIZE = data.BYTES_PER_ELEMENT;
-
- // Assign the buffer object to the attribute variable
-
- var a_attribute = gl.getAttribLocation(gl.program, attribute);
- if (a_attribute < 0) {
-   console.log('Failed to get the storage location of ' + attribute);
-   return false;
- }
- gl.vertexAttribPointer(a_attribute, num, gl.FLOAT, false, FSIZE * num, 0);
- // Enable the assignment of the buffer object to the attribute variable
- gl.enableVertexAttribArray(a_attribute);
-
- return true;
+    // Create a buffer object
+    var buffer = gl.createBuffer();
+    if (!buffer) {
+      console.log('Failed to create the buffer object');
+      return false;
+    }
+    // Write date into the buffer object
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    // Assign the buffer object to the attribute variable
+    var a_attribute = gl.getAttribLocation(gl.program, attribute);
+    if (a_attribute < 0) {
+      console.log('Failed to get the storage location of ' + attribute);
+      return false;
+    }
+    gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
+    // Enable the assignment of the buffer object to the attribute variable
+    gl.enableVertexAttribArray(a_attribute);
+  
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  
+    return true;
   }
 
   function initAxesVertexBuffers(gl) {
@@ -597,36 +590,10 @@ function popMatrix() { // Retrieve the matrix from the array
   return g_matrixStack.pop();
 }
 
-function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
-
-  
-    var GrassTexture = gl.createTexture()
-    var GrassTexture1 = gl.createTexture()
-  if(!GrassTexture || !GrassTexture1)
-  {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-
-  var u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
-  var u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
-   if (!u_Sampler0 || !u_Sampler1) {
-     console.log('Failed to get the storage location of u_Sampler');
-     return false;
-   }
-
-  GrassTexture.image = new Image();
-  GrassTexture1.image = new Image();
-  if(!GrassTexture.image || !GrassTexture1)
-  {
-    console.log('Failed to create the image object');
-    return false;
-  }
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  GrassTexture.image.onload = function() {
-   
+function drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture,u_Sampler){
+  gl.uniform1i(u_UseTextures, false);
       // Clear color and depth buffer
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   gl.uniform1i(u_isLighting, false); // Will not apply lighting 
 
@@ -653,7 +620,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
     modelMatrix.rotate(g_yAngle, 0, 1, 0); // Rotate along y axis
     modelMatrix.rotate(g_xAngle, 1, 0, 0); // Rotate along x axis
        // CREATE THE GROUND
-       gl.uniform1i(u_UseTextures, false); // Will apply lighting
+       gl.uniform1i(u_UseTextures, true);
   var n = ground(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
@@ -663,22 +630,15 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   pushMatrix(modelMatrix);
     modelMatrix.translate(0, -2, 0);
     modelMatrix.scale(11.5, 0.05, 8); 
-    loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture, u_Sampler0, u_UseTextures)
-    //drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture, u_Sampler, u_UseTextures,u_Sampler);
     modelMatrix = popMatrix();
 
+    gl.uniform1i(u_UseTextures, false);
 
+}
 
-    
-    }
-
-  GrassTexture.image.src = 'textures/test1.png';
-
-
-
-  GrassTexture1.image.onload = function() {
-
-    var n = cubes(gl);
+function drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture,u_Sampler){
+  var n = cubes(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
     return;
@@ -686,16 +646,14 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
 
   /*Start of building 1 */
 
- // CREATING ALL THE WALLS
-  gl.uniform1i(u_UseTextures, true);
+
   //Base of building 1 (big one)
   pushMatrix(modelMatrix);
   modelMatrix.translate(-1.08, -1.8 , -2);
   modelMatrix.scale(9.3, 0.4, 4); // Scale
-  loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture1, u_Sampler1, u_UseTextures)
+  loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture, u_Sampler, u_UseTextures,u_Sampler)
   modelMatrix = popMatrix();
 
-  
   gl.uniform1i(u_UseTextures, false);
   //First step from top
   pushMatrix(modelMatrix);
@@ -717,9 +675,8 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   modelMatrix.scale(1, 0.09, 0.9); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
-
-
   gl.uniform1i(u_UseTextures, true);
+
   //Left wall 
   pushMatrix(modelMatrix);
   modelMatrix.translate(-5.69, 0.9, -2.4);
@@ -917,6 +874,7 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   modelMatrix.scale(0.08, 1.55, 6); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix(); 
+  gl.uniform1i(u_UseTextures, false);
 
  //Sign
  pushMatrix(modelMatrix);
@@ -952,8 +910,49 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
  modelMatrix = popMatrix(); 
 
- }
+}
+
+function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
+
+  
+    var GrassTexture = gl.createTexture()
+    var GrassTexture1 = gl.createTexture()
+  if(!GrassTexture || !GrassTexture1)
+  {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+   if (!u_Sampler) {
+     console.log('Failed to get the storage location of u_Sampler');
+     return false;
+   }
+
+  GrassTexture.image = new Image();
+  GrassTexture1.image = new Image();
+  if(!GrassTexture || !GrassTexture1.image)
+  {
+    console.log('Failed to create the image object');
+    return false;
+  }
+
+  
+  GrassTexture.image.onload = function() {
+    drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture);
+
+  }
+
+  GrassTexture.image.src = 'textures/grass.jpg';
+
+
+
+  GrassTexture1.image.onload = function() {
+    drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture1);
+  }
+
   GrassTexture1.image.src = 'textures/pavement.jpg';
+
 
 }
 
@@ -975,38 +974,29 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
 }
 
 function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler, u_UseTextures) {
-  pushMatrix(modelMatrix);
-    // Pass the model matrix to the uniform variable
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
 
-    // Calculate the normal transformation matrix and pass it to u_NormalMatrix
-    g_normalMatrix.setInverseOf(modelMatrix);
-    g_normalMatrix.transpose();
-    gl.uniformMatrix4fv(u_NormalMatrix, false, g_normalMatrix.elements);
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE0);
 
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
-    gl.activeTexture(gl.TEXTURE0);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
 
-    // Bind the texture object to the target
-    gl.bindTexture(gl.TEXTURE_2D, texture);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, texture.image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
-    // Set the texture image
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, texture.image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  // Assign u_Sampler to TEXTURE0
+  gl.uniform1i(u_Sampler, 0);
 
-    // Assign u_Sampler to TEXTURE0
-    gl.uniform1i(u_Sampler, 0);
+  // Enable texture mapping
+  gl.uniform1i(u_UseTextures, true);
 
-    // Enable texture mapping
-    gl.uniform1i(u_UseTextures, true);
-
-    // Draw the textured cube
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-
-
-  modelMatrix = popMatrix();
+  // Draw the textured cube
+  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
 
