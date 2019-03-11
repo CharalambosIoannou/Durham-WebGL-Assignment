@@ -119,7 +119,7 @@ function main() {
   gl.uniform3fv(u_LightDirection, lightDirection.elements);
 
   // Calculate the view matrix and the projection matrix
-  viewMatrix.setLookAt(0, 0, 15, 0, 0, -100, 0, 1, 0);
+  viewMatrix.setLookAt(0, 0, 10, 0, 0, -100, 0, 1, 0);
   projMatrix.setPerspective(45, canvas.width/canvas.height, 1, 100);
   // Pass the model, view, and projection matrix to the uniform variable respectively
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
