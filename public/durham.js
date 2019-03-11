@@ -573,6 +573,82 @@ function ground(gl) {
   
     return indices.length;
   }
+
+  function triangle(gl) {
+    // Create a cube
+    //    v6----- v5
+    //   /|      /|
+    //  v1------v0|
+    //  | |     | |
+    //  | |v7---|-|v4
+    //  |/      |/
+    //  v2------v3
+    var vertices = new Float32Array([   // Coordinates
+      -0.5, -0.5, 0.0,
+      0.5, -0.5, 0.0,
+      0.0,  0.5, 0.0, 
+   ]);
+  
+  
+   var colors = new Float32Array([    // Colors
+    0.5019,0.5019,0.5019,
+    0.5019,0.5019,0.5019,
+    0.5019,0.5019,0.5019,
+  
+    
+  ]);
+  
+  var texCoords = new Float32Array([
+    1.0, 1.0,    0.0, 1.0,   0.0, 0.0,    // v0-v1-v2-v3 front
+    0.0, 0.0,    1.0, 0.0,   1.0, 1.0,    // v7-v4-v3-v2 down
+    0.0, 0.0,    1.0, 0.0,   1.0, 1.0,    // v4-v7-v6-v5 back
+  ]);
+
+
+   var normals = new Float32Array([    // Normal
+     0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,    // v0-v1-v2-v3 front
+     0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,    // v7-v4-v3-v2 down
+     0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,    // v4-v7-v6-v5 back
+   ]);
+  
+  
+   // Indices of the vertices
+   var indices = new Uint8Array([
+    0, 1, 2,   
+
+
+  ]);
+  
+  
+    // Indices of the vertices
+  
+  
+    // Write the vertex property to buffers (coordinates, colors and normals)
+    if (!initArrayBuffer(gl, 'a_Position', vertices, 3, gl.FLOAT)) return -1;
+    if (!initArrayBuffer(gl, 'a_Color', colors, 3, gl.FLOAT)) return -1;
+    if (!initArrayBuffer(gl, 'a_Normal', normals, 3, gl.FLOAT)) return -1;
+    if (!initArrayBuffer(gl, 'a_TexCoords', texCoords, 2, gl.FLOAT)) return -1;
+
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    // Write the indices to the buffer object
+    var indexBuffer = gl.createBuffer();
+    if (!indexBuffer) {
+      console.log('Failed to create the buffer object');
+      return false;
+    }
+  
+
+  
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+    
+  
+    return indices.length;
+  }
+  
+
   
 
 
@@ -714,19 +790,13 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
 
   // Set the vertex coordinates and color (for the x, y axes)
 
-  var n = initAxesVertexBuffers(gl);
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
 
   // Calculate the view matrix and the projection matrix
   modelMatrix.setTranslate(0, 0, 0);  // No Translation
   // Pass the model matrix to the uniform variable
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
-  // Draw x and y axes
-  gl.drawArrays(gl.LINES, 0, n);
+
 
   gl.uniform1i(u_isLighting, true); // Will apply lighting
 
@@ -759,7 +829,12 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
 
   /*Start of building 1 */
 
-
+  
+  var n = cubes(gl,'grey');
+  if (n < 0) {
+    console.log('Failed to set the vertex information');
+    return;
+  }
 
   //Base of building 1 (big one)
   pushMatrix(modelMatrix);
@@ -882,6 +957,117 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   modelMatrix.scale(0.06, 9.3, 2.26); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
+
+  //Chimney left
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.18, -1.57);
+  modelMatrix.scale(0.5, 1, 1); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+
+  var n = triangle(gl);
+  if (n < 0) {
+    console.log('Failed to set the vertex information');
+    return;
+  }
+
+  //Cover Sides of roof
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.58 ,4.15 , -2.37);
+  modelMatrix.rotate(90,0,1,0);  
+  modelMatrix.scale(3.29, 1.74, 2.6); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-5.73 ,4.15 , -2.37);
+  modelMatrix.rotate(180,0,1,0); 
+  modelMatrix.rotate(90,0,1,0);  
+  modelMatrix.scale(3.29, 1.74, 2.6); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  var n = cylinder(gl,'black');
+
+  //cyl 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.9);
+  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+  modelMatrix.rotate(90,1,0,0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix(); 
+
+  //cyl 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.65);
+  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+  modelMatrix.rotate(90,1,0,0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix(); 
+
+  //cyl 3
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.40);
+  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+  modelMatrix.rotate(90,1,0,0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix(); 
+
+  //cyl 4
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.17);
+  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+  modelMatrix.rotate(90,1,0,0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix(); 
+
+  
+  var n = cubes(gl,'grey');
+
+    //Chimney right
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.08, 4.18, -1.57);
+    modelMatrix.scale(0.5, 1, 1); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    var n = cylinder(gl,'black');
+  
+    //cyl 1
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.08, 4.85, -1.9);
+    modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+    modelMatrix.rotate(90,1,0,0);
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix(); 
+  
+    //cyl 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.08, 4.85, -1.65);
+    modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+    modelMatrix.rotate(90,1,0,0);
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix(); 
+  
+    //cyl 3
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.08, 4.85, -1.40);
+    modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+    modelMatrix.rotate(90,1,0,0);
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix(); 
+  
+    //cyl 4
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.08, 4.85, -1.17);
+    modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+    modelMatrix.rotate(90,1,0,0);
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix(); 
+
+
+    var n = cubes(gl,'grey');
 
   //Cover upper part of roof
   pushMatrix(modelMatrix);
@@ -1086,8 +1272,8 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
 
   //Left horizontal wall of building 2
   pushMatrix(modelMatrix);
-  modelMatrix.translate(3.7, -0.30 , -0.98);
-  modelMatrix.scale(0.08, 0.8, 6); // Scale
+  modelMatrix.translate(3.7, -0.35 , -0.98);
+  modelMatrix.scale(0.08, 0.9, 6); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
@@ -1126,6 +1312,13 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
+   //Front wall of building 2
+   pushMatrix(modelMatrix);
+   modelMatrix.translate(4.65, -0.9 , 1.98);
+   modelMatrix.scale(2, 2, 0.08); // Scale
+   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+   modelMatrix = popMatrix();
+
   //Roof left part
   pushMatrix(modelMatrix);
   modelMatrix.translate(4.20, 0.69 , -0.98);
@@ -1134,6 +1327,47 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();  
 
+  //Windows on roof
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(4.20, 0.69 , 0.5);
+  modelMatrix.scale(0.8, 1, 2); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();  
+
+  var n = cubes(gl,'blue');
+
+  //Windows on roof
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.95, 0.75, 1.25);
+  modelMatrix.rotate(-90,0,1,0);
+  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.95, 0.75, 0.75);
+  modelMatrix.rotate(-90,0,1,0);
+  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.95, 0.75, 0.25);
+  modelMatrix.rotate(-90,0,1,0);
+  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.95, 0.75, -0.25);
+  modelMatrix.rotate(-90,0,1,0);
+  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+
+
+  var n = cubes(gl,'grey');
   //Roof right part
   pushMatrix(modelMatrix);
   modelMatrix.translate(5.16, 0.69 , -0.98);
@@ -1142,15 +1376,49 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix(); 
 
-  /*
-  var n = cubes(gl,'blue');
+  var n = triangle(gl);
+  if (n < 0) {
+    console.log('Failed to set the vertex information');
+    return;
+  }
 
   pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.54, -0.91, 2);
-  modelMatrix.scale(0.05, 1.33, 1.2); // Scale
+  modelMatrix.translate(4.68 ,0.62 , 2.03);
+  modelMatrix.scale(2.06, 1.3, 1.9); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
-*/
+
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(4.68 ,0.62 , -3.98);
+  modelMatrix.rotate(180,0,1,0);  
+  modelMatrix.scale(2.06, 1.3, 1.9); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  
+  var n = cubes(gl,'blue');
+  
+  //window 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.64, -1.34, 1.35);
+  modelMatrix.scale(0.05, 1.2, 0.8); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //window 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(3.64, -1.34, -0.08);
+  modelMatrix.scale(0.05, 1.2, 0.9); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
+  //window 3
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(4.7, -1.37, 2);
+  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+
 
   var n = cubes(gl,'grey');
 
@@ -1349,8 +1617,6 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
     // Draw the textured cube
     gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
-    // Draw the cube
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
   modelMatrix = popMatrix();
 }

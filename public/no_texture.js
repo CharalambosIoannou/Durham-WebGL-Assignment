@@ -132,13 +132,13 @@ function main() {
   }
 
   document.onkeydown = function(ev){
-    keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures);
+    keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,u_LightColor,u_LightDirection);
   };
 
   draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures);
 }
 
-function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
+function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,u_LightColor,u_LightDirection) {
   switch (ev.keyCode) {
     case 40: // Up arrow key -> the positive rotation of arm1 around the y-axis
       g_xAngle = (g_xAngle + ANGLE_STEP) % 360;
@@ -152,6 +152,13 @@ function keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextu
     case 37: // Left arrow key -> the negative rotation of arm1 around the y-axis
       g_yAngle = (g_yAngle - ANGLE_STEP) % 360;
       break;
+    case 32: // Right arrow key -> the positive rotation of arm1 around the y-axis
+    gl.uniform3f(u_LightColor, 1.0, 1.0, 0.0);
+    // Set the light direction (in the world coordinate)
+    var lightDirection = new Vector3([0.5, 3.0, 4.0]);
+    lightDirection.normalize();     // Normalize
+    gl.uniform3fv(u_LightDirection, lightDirection.elements);
+    break;
     default: return; // Skip drawing at no effective action
   }
 
@@ -940,7 +947,6 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   
   GrassTexture.image.onload = function() {
     drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture);
-
   }
 
   GrassTexture.image.src = 'textures/grass.jpg';
@@ -952,8 +958,6 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
   }
 
   GrassTexture1.image.src = 'textures/pavement.jpg';
-
-
 }
 
 function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
