@@ -71,6 +71,10 @@ var zoom_decrement=1;
 var original_side=0;
 var side_increment=0.5;
 var side_decrement=0.5;
+var currentAngle = 5.0;
+var pole_length = 0.5;
+var pole_dir =-1.5 ;
+var rotating_door = 3.0; 
 
 
 
@@ -136,6 +140,13 @@ function main() {
     console.log('Failed to get the storage location for texture map enable flag');
     return;
   }
+
+  var tick = function() {
+    currentAngle = animate(currentAngle);  // Update the rotation angle
+    draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);   // Draw the triangle
+    requestAnimationFrame(tick, canvas);   // Request that the browser ?calls tick
+  };
+  tick();
 
   document.onkeydown = function(ev){
     keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,u_LightColor,u_LightDirection,u_ViewMatrix);
@@ -819,7 +830,7 @@ function popMatrix() { // Retrieve the matrix from the array
   return g_matrixStack.pop();
 }
 
-function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
+function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle) {
 
   
     var GrassTexture = gl.createTexture()
@@ -1290,6 +1301,7 @@ var n = cubes(gl,'grey');
 
   pushMatrix(modelMatrix);
   modelMatrix.translate(-0.97, -0.91, -0.75);
+  modelMatrix.rotate(0,0,1,0);
   modelMatrix.scale(0.79, 1.33, 0.05); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
@@ -1297,9 +1309,12 @@ var n = cubes(gl,'grey');
   var n = cubes(gl,'door');
 
   pushMatrix(modelMatrix);
+  
   modelMatrix.translate(-2.25, -0.91, -0.75);
-  modelMatrix.scale(0.79, 1.33, 0.05); // Scale
+  modelMatrix.rotate(currentAngle,0,1,0);
+  modelMatrix.scale(0.79, 1.33, 0.05); // Scale    
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  
   modelMatrix = popMatrix();
 
   var n = cubes(gl,'white');
@@ -1729,7 +1744,6 @@ var n = cubes(gl,'grey');
   //window 2
   pushMatrix(modelMatrix);
   modelMatrix.translate(3.64, -1.34, -0.08);
-  
   modelMatrix.scale(0.05, 1.2, 0.9); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
@@ -1759,24 +1773,32 @@ var n = cubes(gl,'grey');
 
   //pole 1
   pushMatrix(modelMatrix);
- modelMatrix.translate(-2.8, -1.5 , 2.2); 
- modelMatrix.scale(0.1, 0.5, 0.1); // Scale
+  if (pole_length > 0.5){
+    pole_dir=-1.5;
+    pole_length=0.5;
+  }
+  if (pole_length <= 0.0){
+    pole_dir=-2;
+    pole_length=0;
+  }
+ modelMatrix.translate(-2.8, pole_dir , 2.2); 
+ modelMatrix.scale(0.1, pole_length, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
  modelMatrix = popMatrix(); 
 
  //pole 2
  pushMatrix(modelMatrix);
- modelMatrix.translate(-2.8, -1.5 , 3); 
- modelMatrix.scale(0.1, 0.5, 0.1); // Scale
+ modelMatrix.translate(-2.8, pole_dir , 3); 
+ modelMatrix.scale(0.1, pole_length, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
  modelMatrix = popMatrix(); 
 
  //pole 3
  pushMatrix(modelMatrix);
- modelMatrix.translate(-2.8, -1.5 , 3.8); 
- modelMatrix.scale(0.1, 0.5, 0.1); // Scale
+ modelMatrix.translate(-2.8, pole_dir , 3.8); 
+ modelMatrix.scale(0.1,pole_length, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
  modelMatrix = popMatrix(); 
@@ -1864,11 +1886,13 @@ var n = cubes(gl,'grey');
   //tree leaf 8
   pushMatrix(modelMatrix);
   modelMatrix.translate(2.33, -1.2, 1.5);  
+  //modelMatrix.setRotate(currentAngle, 1, 1, 0);
   modelMatrix.rotate(180,0,1,0);
   modelMatrix.rotate(120,0,1,0);
   modelMatrix.rotate(120,0,1,0);
   modelMatrix.rotate(45,0,0,1);
   modelMatrix.scale(0.04, 0.7, 0.05); // Scale
+  
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
@@ -1892,9 +1916,12 @@ var n = cubes(gl,'light_yellow');
 
 //flower
 pushMatrix(modelMatrix);
+
 modelMatrix.translate(-5.2, -1.4, 0.5);
+
 modelMatrix.rotate(45,0,0,1);
 modelMatrix.scale(0.06, 0.7, 0.06); // Scale
+
 drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
 modelMatrix = popMatrix();
 
@@ -2045,4 +2072,38 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
   modelMatrix = popMatrix();
 }
 
+var g_last = Date.now();
+function animate(angle) {
+  // Calculate the elapsed time
+  var now = Date.now();
+  var elapsed = now - g_last;
+  g_last = now;
+  // Update the current rotation angle (adjusted by the elapsed time)
+  var newAngle = angle + (rotating_door * elapsed) / 1000.0;
+  return newAngle %= 360;
+}
+
+function up() {
+  rotating_door += 10; 
+  pole_dir +=0.1;
+  pole_length +=0.1;
+}
+
+function down() {
+  rotating_door -= 10; 
+  pole_dir -=0.1;
+  pole_length -=0.1;
+  
+}
+
+function up_Barriers() {
+  pole_dir +=0.1;
+  pole_length +=0.1;
+}
+
+function down_Barriers() {
+  pole_dir -=0.1;
+  pole_length -=0.1;
+  
+}
 
