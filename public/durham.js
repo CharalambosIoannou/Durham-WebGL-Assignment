@@ -76,8 +76,10 @@ var pole_length = 0.40;
 var pole_dir =-1.5 ;
 var rotating_door = 3.0; 
 var barrier_end = false;
-var car_dir = -5 ;
-var car_end = false;
+var bird_dir = 3.5 ;
+var bird_end = false;
+var bird_angle = 0;
+var bird_angle_flag = false;
 
 
 
@@ -148,6 +150,7 @@ function main() {
     currentAngle = animate(currentAngle);  // Update the rotation angle
     repeat_barriers();
     repeat_car();
+    repeat_bird();
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);   // Draw the triangle
     requestAnimationFrame(tick, canvas);   // Request that the browser ?calls tick
   };
@@ -353,6 +356,28 @@ function cubes(gl,colour) {
         0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,　 // v4-v7-v6-v5 back
       ]);
       }
+
+    if (colour == 'saddle_brown'){
+      var colors = new Float32Array([    // Colors
+        0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,   0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509, // v0-v1-v2-v3 front
+        0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,   0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,  // v0-v3-v4-v5 right
+        0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,   0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,  // v0-v5-v6-v1 up
+        0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,   0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,  // v1-v6-v7-v2 left
+        0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,   0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,  // v7-v4-v3-v2 down
+        0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,   0.545098, 0.270588, 0.074509,  0.545098, 0.270588, 0.074509,　 // v4-v7-v6-v5 back
+      ]);
+      }
+
+  if (colour == 'gold'){
+    var colors = new Float32Array([    // Colors
+      1, 0.745098, 0,  1, 0.745098, 0,   1, 0.745098, 0,  1, 0.745098, 0, // v0-v1-v2-v3 front
+      1, 0.745098, 0,  1, 0.745098, 0,   1, 0.745098, 0,  1, 0.745098, 0,  // v0-v3-v4-v5 right
+      1, 0.745098, 0,  1, 0.745098, 0,   1, 0.745098, 0,  1, 0.745098, 0,  // v0-v5-v6-v1 up
+      1, 0.745098, 0,  1, 0.745098, 0,   1, 0.745098, 0,  1, 0.745098, 0,  // v1-v6-v7-v2 left
+      1, 0.745098, 0,  1, 0.745098, 0,   1, 0.745098, 0,  1, 0.745098, 0,  // v7-v4-v3-v2 down
+      1, 0.745098, 0,  1, 0.745098, 0,   1, 0.745098, 0,  1, 0.745098, 0,　 // v4-v7-v6-v5 back
+    ]);
+    }
 
   var normals = new Float32Array([    // Normal
     0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
@@ -948,73 +973,45 @@ function popMatrix() { // Retrieve the matrix from the array
 
 function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle) {
 
-  
-    var GrassTexture = gl.createTexture()
-  if(!GrassTexture)
-  {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-
-  var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
-   if (!u_Sampler) {
-     console.log('Failed to get the storage location of u_Sampler');
-     return false;
-   }
-
-  GrassTexture.image = new Image();
-  if(!GrassTexture.image)
-  {
-    console.log('Failed to create the image object');
-    return false;
-  }
-
-  var GrassTexture1 = gl.createTexture()
-  if(!GrassTexture1)
-  {
-    console.log('Failed to create the texture object');
-    return false;
-  }
-
-  var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
-   if (!u_Sampler) {
-     console.log('Failed to get the storage location of u_Sampler');
-     return false;
-   }
-
-  GrassTexture1.image = new Image();
-  if(!GrassTexture1.image)
-  {
-    console.log('Failed to create the image object');
-    return false;
-  }
-
- 
-  
-  GrassTexture.image.onload = function() {
-    gl.uniform1i(u_UseTextures, false);
-      // Clear color and depth buffer
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-
-  // Set the vertex coordinates and color (for the x, y axes)
-
-
   // Calculate the view matrix and the projection matrix
   modelMatrix.setTranslate(0, 0, 0);  // No Translation
   // Pass the model matrix to the uniform variable
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-
-
-
   gl.uniform1i(u_isLighting, true); // Will apply lighting
 
     // Rotate, and then translate
     //modelMatrix.setTranslate(0, 0, 0);  // Translation (No translation is supported here)
     modelMatrix.rotate(g_yAngle, 0, 1, 0); // Rotate along y axis
     modelMatrix.rotate(g_xAngle, 1, 0, 0); // Rotate along x axis
-       // CREATE THE GROUND
-       gl.uniform1i(u_UseTextures, true);
+   
+  var ground_texture = gl.createTexture()
+  var building_texture = gl.createTexture()
+  if(!ground_texture || !building_texture)
+  {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+
+  var u_Sampler = gl.getUniformLocation(gl.program, 'u_Sampler');
+   if (!u_Sampler) {
+     console.log('Failed to get the storage location of u_Sampler');
+     return false;
+   }
+
+  ground_texture.image = new Image();
+  building_texture.image = new Image();
+  if(!ground_texture.image  || !building_texture.image)
+  {
+    console.log('Failed to create the image object');
+    return false;
+  }
+
+  //ground_texture.image.crossOrigin = "anonymous";
+ 
+ 
+  ground_texture.image.onload = function() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
   var n = ground(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
@@ -1024,1153 +1021,1055 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,cur
   pushMatrix(modelMatrix);
     modelMatrix.translate(0, -2, 0);
     modelMatrix.scale(11.5, 0.05, 8); 
-    loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture, u_Sampler, u_UseTextures)
+    loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, ground_texture, u_Sampler, u_UseTextures)
     modelMatrix = popMatrix();
 
-    gl.uniform1i(u_UseTextures, false);
-
-     // CREATING ALL THE WALLS
-  var n = cubes(gl,'grey');
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
   }
 
-  /*Start of building 1 */
+  ground_texture.image.src = 'textures/pave5.jpg';
 
-  
-  var n = cubes(gl,'grey');
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
+  building_texture.image.onload = function(){
+     
+     /*Start of building 1 */
+   
+     
+     var n = cubes(gl,'grey');
+     if (n < 0) {
+       console.log('Failed to set the vertex information');
+       return;
+     }
+   
+     //Base of building 1 (big one)
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, -1.8 , -2);
+     modelMatrix.scale(9.3, 0.4, 4); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+     //First step from top
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.07, -1.75, 0.2);
+     modelMatrix.scale(1, 0.09, 0.5); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //Second step from top
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.07, -1.84, 0.2);
+     modelMatrix.scale(1, 0.09, 0.7); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //Third step
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.07, -1.93, 0.2);
+     modelMatrix.scale(1, 0.09, 0.9); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //Left wall 
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-5.69, 0.9, -2.4);
+     modelMatrix.scale(0.08, 5, 3.2); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Back wall
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.1, 0.9, -3.96);
+     modelMatrix.scale(9.2, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Right wall
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(3.53, 0.9, -2.4);
+     modelMatrix.scale(0.08, 5, 3.2); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-5.53, 0.9, -0.8);
+     modelMatrix.scale(0.4, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.19, 0.9, -0.8);
+     modelMatrix.scale(0.5, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 3
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.90, 0.9, -0.8);
+     modelMatrix.scale(0.5, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 4
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.61, 0.9, -0.8);
+     modelMatrix.scale(0.5, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 5
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-0.32, 0.9, -0.8);
+     modelMatrix.scale(0.5, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 6
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0.97, 0.9, -0.8);
+     modelMatrix.scale(0.5, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 7
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.25, 0.9, -0.8);
+     modelMatrix.scale(0.5, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Front wall 8
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(3.37, 0.9, -0.8);
+     modelMatrix.scale(0.4, 5, 0.08); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+    //Roof Back part
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.18, -3.17);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.rotate(45,0,1,0);
+     modelMatrix.scale(0.06, 9.3, 2.26); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Roof Front part
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.18, -1.57);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.rotate(45,0,-1,0);
+     modelMatrix.scale(0.06, 9.3, 2.26); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+     var n = cubes(gl,'saddle_brown');
+
+     //Chimney left
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.18, -1.57);
+     modelMatrix.scale(0.5, 1, 1); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+   
+     var n = triangle(gl);
+     if (n < 0) {
+       console.log('Failed to set the vertex information');
+       return;
+     }
+   
+     //Cover Sides of roof
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(3.58 ,4.15 , -2.37);
+     modelMatrix.rotate(90,0,1,0);  
+     modelMatrix.scale(3.29, 1.74, 2.6); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-5.73 ,4.15 , -2.37);
+     modelMatrix.rotate(180,0,1,0); 
+     modelMatrix.rotate(90,0,1,0);  
+     modelMatrix.scale(3.29, 1.74, 2.6); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     var n = cylinder(gl,'black');
+   
+     //cyl 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.85, -1.9);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     //cyl 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.85, -1.65);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     //cyl 3
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.85, -1.40);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     //cyl 4
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.85, -1.17);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     
+   var n = cubes(gl,'saddle_brown');
+   
+     //Chimney right
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.08, 4.18, -1.57);
+     modelMatrix.scale(0.5, 1, 1); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     var n = cylinder(gl,'black');
+   
+     //cyl 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.08, 4.85, -1.9);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     //cyl 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.08, 4.85, -1.65);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     //cyl 3
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.08, 4.85, -1.40);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+     //cyl 4
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.08, 4.85, -1.17);
+     modelMatrix.scale(0.1, 0.3, 0.1); // Scale
+     modelMatrix.rotate(90,1,0,0);
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix(); 
+   
+   
+     var n = cubes(gl,'grey');
+   
+     //Cover upper part of roof
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 4.97, -2.37);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.06, 9.3, 0.05); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Gap between windows 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 3.17, -0.79);
+     modelMatrix.scale(9.03, 0.5, 0.05); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Gap between windows 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 1.6, -0.79);
+     modelMatrix.scale(9.03, 0.5, 0.05); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     //Gap between windows 3
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.08, 0, -0.79);
+     modelMatrix.scale(9.03, 0.5, 0.05); // Scale
+     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, building_texture, u_Sampler, u_UseTextures)
+     modelMatrix = popMatrix();
+   
+     var n = cubes(gl,'blue');
+     //window starting top right and move to the left
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.82, 2.34, -0.75);
+     modelMatrix.scale(0.78, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(1.61, 2.34, -0.75);
+     modelMatrix.scale(0.78, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0.32, 2.34, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-0.97, 2.34, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.25, 2.34, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-3.54, 2.34, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.88, 2.34, -0.75);
+     modelMatrix.scale(0.87, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //Second row
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.82, 0.8, -0.75);
+     modelMatrix.scale(0.78, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(1.61, 0.8, -0.75);
+     modelMatrix.scale(0.78, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0.32, 0.8, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-0.97, 0.8, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.25, 0.8, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-3.54, 0.8, -0.75);
+     modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.88, 0.8, -0.75);
+     modelMatrix.scale(0.87, 1.2, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //Third row
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(2.82, -0.91, -0.75);
+     modelMatrix.scale(0.78, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(1.61, -0.91, -0.75);
+     modelMatrix.scale(0.78, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0.32, -0.91, -0.75);
+     modelMatrix.scale(0.79, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-0.97, -0.91, -0.75);
+     modelMatrix.rotate(0,0,1,0);
+     modelMatrix.scale(0.79, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     var n = cubes(gl,'door');
+   
+     pushMatrix(modelMatrix);
+     
+     modelMatrix.translate(-2.25, -0.91, -0.75);
+     modelMatrix.rotate(currentAngle,0,1,0);
+     modelMatrix.scale(0.79, 1.33, 0.05); // Scale    
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     
+     modelMatrix = popMatrix();
+   
+     var n = cubes(gl,'white');
+   
+     //Left frame
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.68, -0.91, -0.70);
+     modelMatrix.scale(0.1, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.8, -0.91, -0.70);
+     modelMatrix.scale(0.1, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.24, -0.2, -0.70);
+     modelMatrix.scale(1, 0.1, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     var n = cubes(gl,'blue');
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-3.54, -0.91, -0.75);
+     modelMatrix.scale(0.79, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.88, -0.91, -0.75);
+     modelMatrix.scale(0.87, 1.33, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     var n = cubes(gl,'black');
+   
+     //pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-5.65, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.65, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-5.15, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.87, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-5.15, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.87, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     
+     //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-3.65, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.15, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.87, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-4.15, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.87, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-2.65, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-3.15, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.87, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-3.15, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.87, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+   
+     /////////////////////////////////////////
+   
+     //pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.5, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-0.5, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     
+     //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0.5, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(0, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(1.5, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(1, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(1, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+      //pole 2
+      pushMatrix(modelMatrix);
+      modelMatrix.translate(2.5, -1.3, -0.03);
+      modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+      drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+      modelMatrix = popMatrix();
+    
+      //horizontal pole 1
+      pushMatrix(modelMatrix);
+      modelMatrix.translate(2, -1.37, -0.03);
+      modelMatrix.rotate(90,0,0,1);
+      modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+      drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+      modelMatrix = popMatrix();
+    
+      //horizontal pole 2
+      pushMatrix(modelMatrix);
+      modelMatrix.translate(2, -1.17, -0.03);
+      modelMatrix.rotate(90,0,0,1);
+      modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+      drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+      modelMatrix = popMatrix();
+   
+       //pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(3.5, -1.3, -0.03);
+     modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(3, -1.37, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+     //horizontal pole 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(3, -1.17, -0.03);
+     modelMatrix.rotate(90,0,0,1);
+     modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+       //pole 2
+       pushMatrix(modelMatrix);
+       modelMatrix.translate(-1.59, -1.6, 0.7);
+       modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+       drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+       modelMatrix = popMatrix();
+   
+       //pole 2
+       pushMatrix(modelMatrix);
+       modelMatrix.translate(-2.59, -1.6, 0.7);
+       modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+       drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+       modelMatrix = popMatrix();
+   
+       //diagonal pole 1
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(-1.54, -1.38, 0.36);
+     modelMatrix.rotate(90,0,1,0);
+     modelMatrix.rotate(120,0,0,1);
+     modelMatrix.scale(0.05, 0.81, 0.05); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+   
+       //diagonal pole 2
+       pushMatrix(modelMatrix);
+       modelMatrix.translate(-2.6, -1.38, 0.36);
+       modelMatrix.rotate(90,0,1,0);
+       modelMatrix.rotate(120,0,0,1);
+       modelMatrix.scale(0.05, 0.81, 0.05); // Scale
+       drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+       modelMatrix = popMatrix();
+       
+     gl.uniform1i(u_UseTextures,false);
   }
-
-  //Base of building 1 (big one)
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, -1.8 , -2);
-  modelMatrix.scale(9.3, 0.4, 4); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-  //First step from top
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.07, -1.75, 0.2);
-  modelMatrix.scale(1, 0.09, 0.5); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Second step from top
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.07, -1.84, 0.2);
-  modelMatrix.scale(1, 0.09, 0.7); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Third step
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.07, -1.93, 0.2);
-  modelMatrix.scale(1, 0.09, 0.9); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Left wall 
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-5.69, 0.9, -2.4);
-  modelMatrix.scale(0.08, 5, 3.2); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Back wall
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.1, 0.9, -3.96);
-  modelMatrix.scale(9.2, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Right wall
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.53, 0.9, -2.4);
-  modelMatrix.scale(0.08, 5, 3.2); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-5.53, 0.9, -0.8);
-  modelMatrix.scale(0.4, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.19, 0.9, -0.8);
-  modelMatrix.scale(0.5, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 3
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.90, 0.9, -0.8);
-  modelMatrix.scale(0.5, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 4
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.61, 0.9, -0.8);
-  modelMatrix.scale(0.5, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 5
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-0.32, 0.9, -0.8);
-  modelMatrix.scale(0.5, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 6
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0.97, 0.9, -0.8);
-  modelMatrix.scale(0.5, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 7
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.25, 0.9, -0.8);
-  modelMatrix.scale(0.5, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Front wall 8
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.37, 0.9, -0.8);
-  modelMatrix.scale(0.4, 5, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
- //Roof Back part
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.18, -3.17);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.rotate(45,0,1,0);
-  modelMatrix.scale(0.06, 9.3, 2.26); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Roof Front part
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.18, -1.57);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.rotate(45,0,-1,0);
-  modelMatrix.scale(0.06, 9.3, 2.26); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Chimney left
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.18, -1.57);
-  modelMatrix.scale(0.5, 1, 1); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-
-  var n = triangle(gl);
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
-
-  //Cover Sides of roof
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.58 ,4.15 , -2.37);
-  modelMatrix.rotate(90,0,1,0);  
-  modelMatrix.scale(3.29, 1.74, 2.6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-5.73 ,4.15 , -2.37);
-  modelMatrix.rotate(180,0,1,0); 
-  modelMatrix.rotate(90,0,1,0);  
-  modelMatrix.scale(3.29, 1.74, 2.6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  var n = cylinder(gl,'black');
-
-  //cyl 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.85, -1.9);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  //cyl 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.85, -1.65);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  //cyl 3
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.85, -1.40);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  //cyl 4
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.85, -1.17);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
+  building_texture.image.src= 'textures/brick9.jpg'
+   
   
-var n = cubes(gl,'grey');
-
-  //Chimney right
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.08, 4.18, -1.57);
-  modelMatrix.scale(0.5, 1, 1); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  var n = cylinder(gl,'black');
-
-  //cyl 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.08, 4.85, -1.9);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  //cyl 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.08, 4.85, -1.65);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  //cyl 3
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.08, 4.85, -1.40);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  //cyl 4
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.08, 4.85, -1.17);
-  modelMatrix.scale(0.1, 0.3, 0.1); // Scale
-  modelMatrix.rotate(90,1,0,0);
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-
-  var n = cubes(gl,'grey');
-
-  //Cover upper part of roof
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 4.97, -2.37);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.06, 9.3, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Gap between windows 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 3.17, -0.79);
-  modelMatrix.scale(9.03, 0.5, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Gap between windows 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 1.6, -0.79);
-  modelMatrix.scale(9.03, 0.5, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Gap between windows 3
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.08, 0, -0.79);
-  modelMatrix.scale(9.03, 0.5, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  var n = cubes(gl,'blue');
-  //window starting top right and move to the left
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.82, 2.34, -0.75);
-  modelMatrix.scale(0.78, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(1.61, 2.34, -0.75);
-  modelMatrix.scale(0.78, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0.32, 2.34, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-0.97, 2.34, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.25, 2.34, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.54, 2.34, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.88, 2.34, -0.75);
-  modelMatrix.scale(0.87, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Second row
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.82, 0.8, -0.75);
-  modelMatrix.scale(0.78, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(1.61, 0.8, -0.75);
-  modelMatrix.scale(0.78, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0.32, 0.8, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-0.97, 0.8, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.25, 0.8, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.54, 0.8, -0.75);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.88, 0.8, -0.75);
-  modelMatrix.scale(0.87, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Third row
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.82, -0.91, -0.75);
-  modelMatrix.scale(0.78, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(1.61, -0.91, -0.75);
-  modelMatrix.scale(0.78, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0.32, -0.91, -0.75);
-  modelMatrix.scale(0.79, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-0.97, -0.91, -0.75);
-  modelMatrix.rotate(0,0,1,0);
-  modelMatrix.scale(0.79, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  var n = cubes(gl,'door');
-
-  pushMatrix(modelMatrix);
   
-  modelMatrix.translate(-2.25, -0.91, -0.75);
-  modelMatrix.rotate(currentAngle,0,1,0);
-  modelMatrix.scale(0.79, 1.33, 0.05); // Scale    
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    
   
-  modelMatrix = popMatrix();
-
-  var n = cubes(gl,'white');
-
-  //Left frame
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.68, -0.91, -0.70);
-  modelMatrix.scale(0.1, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.8, -0.91, -0.70);
-  modelMatrix.scale(0.1, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.24, -0.2, -0.70);
-  modelMatrix.scale(1, 0.1, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  var n = cubes(gl,'blue');
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.54, -0.91, -0.75);
-  modelMatrix.scale(0.79, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.88, -0.91, -0.75);
-  modelMatrix.scale(0.87, 1.33, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  var n = cubes(gl,'black');
-
-  //pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-5.65, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.65, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-5.15, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.87, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-5.15, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.87, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
+          
+      /*Start of building 2 */
   
-  //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.65, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.15, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.87, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-4.15, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.87, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-2.65, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.15, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.87, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-3.15, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.87, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-
-  /////////////////////////////////////////
-
-  //pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.5, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-0.5, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
   
-  //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0.5, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(0, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(1.5, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(1, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(1, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
+  
+      var n = cubes(gl,'grey');
+    //Base of building 2 (small one)
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.65, -1.93 , -0.98);
+    modelMatrix.scale(2.1, 0.1, 6); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //Left horizontal wall of building 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.7, -0.35 , -0.98);
+    modelMatrix.scale(0.08, 0.9, 6); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //Left vertical wall 1 of building 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.7, -0.9 , 0.7);
+    modelMatrix.scale(0.08, 2, 0.5); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //Left vertical wall 2 of building 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.7, -0.9 , 1.9);
+    modelMatrix.scale(0.08, 2, 0.2); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //Left vertical wall 3 of building 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.7, -0.9 , -2.27);
+    modelMatrix.scale(0.08, 2, 3.45); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //Right wall of building 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(5.66, -0.9 , -0.98);
+    modelMatrix.scale(0.08, 2, 6); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //Back wall of building 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.65, -0.9 , -3.95);
+    modelMatrix.scale(2, 2, 0.08); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+     //Front wall of building 2
+     pushMatrix(modelMatrix);
+     modelMatrix.translate(4.65, -0.9 , 1.98);
+     modelMatrix.scale(2, 2, 0.08); // Scale
+     drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+     modelMatrix = popMatrix();
+  
+    //Roof left part
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.20, 0.69 , -0.98);
+    modelMatrix.rotate(140,0,0,1);
+    modelMatrix.scale(0.08, 1.55, 6); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();  
+  
+    //Windows on roof
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.20, 0.69 , 0.5);
+    modelMatrix.scale(0.8, 1, 2); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();  
+  
+    var n = cubes(gl,'blue');
+  
+    //Windows on roof
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.95, 0.75, 1.25);
+    modelMatrix.rotate(-90,0,1,0);
+    modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.95, 0.75, 0.75);
+    modelMatrix.rotate(-90,0,1,0);
+    modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.95, 0.75, 0.25);
+    modelMatrix.rotate(-90,0,1,0);
+    modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.95, 0.75, -0.25);
+    modelMatrix.rotate(-90,0,1,0);
+    modelMatrix.scale(0.4, 0.7, 0.4); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+  
+  
+    var n = cubes(gl,'grey');
+    //Roof right part
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(5.16, 0.69 , -0.98);
+    modelMatrix.rotate(-140,0,0,1);
+    modelMatrix.scale(0.08, 1.55, 6); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix(); 
+  
+    var n = triangle(gl);
+    if (n < 0) {
+      console.log('Failed to set the vertex information');
+      return;
+    }
+  
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.68 ,0.62 , 2.03);
+    modelMatrix.scale(2.06, 1.3, 1.9); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.68 ,0.62 , -3.98);
+    modelMatrix.rotate(180,0,1,0);  
+    modelMatrix.scale(2.06, 1.3, 1.9); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    
+    var n = cubes(gl,'blue');
+    
+    //window 1
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.64, -1.34, 1.35);
+    modelMatrix.scale(0.05, 1.2, 0.8); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //window 2
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(3.64, -1.34, -0.08);
+    modelMatrix.scale(0.05, 1.2, 0.9); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //window 3
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(4.7, -1.37, 2);
+    modelMatrix.scale(0.79, 1.2, 0.05); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+  
+    var n = cubes(gl,'grey');
+  
+   //Sign
+   pushMatrix(modelMatrix);
+   modelMatrix.translate(-4, -1.5 , 1.5);
+   modelMatrix.scale(1, 1, 0.5); // Scale
+   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+   modelMatrix = popMatrix(); 
+  
+   var n = cylinder(gl,'black');
+    if (n < 0) {
+      console.log('Failed to set the vertex information');
+      return;
+    }
+  
+    //pole 1
+    pushMatrix(modelMatrix);
+    if (pole_length > 0.5){
+      pole_dir=-1.5;
+      pole_length=0.5;
+      barrier_end = false;
+     
+    }
+    if (pole_length <= 0.0){
+      pole_dir=-2;
+      pole_length=0;
+      barrier_end = true;
+    }
+    
+   modelMatrix.translate(-2.5, pole_dir , 2.2); 
+   modelMatrix.scale(0.1, pole_length, 0.1); // Scale
+   modelMatrix.rotate(90,1,0,0);
+   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+   modelMatrix = popMatrix(); 
+  
    //pole 2
    pushMatrix(modelMatrix);
-   modelMatrix.translate(2.5, -1.3, -0.03);
-   modelMatrix.scale(0.1, 0.7, 0.05); // Scale
+   modelMatrix.translate(-2.5, pole_dir , 3); 
+   modelMatrix.scale(0.1, pole_length, 0.1); // Scale
+   modelMatrix.rotate(90,1,0,0);
    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-   modelMatrix = popMatrix();
- 
-   //horizontal pole 1
+   modelMatrix = popMatrix(); 
+  
+   //pole 3
    pushMatrix(modelMatrix);
-   modelMatrix.translate(2, -1.37, -0.03);
-   modelMatrix.rotate(90,0,0,1);
-   modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+   modelMatrix.translate(-2.5, pole_dir , 3.8); 
+   modelMatrix.scale(0.1,pole_length, 0.1); // Scale
+   modelMatrix.rotate(90,1,0,0);
    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-   modelMatrix = popMatrix();
- 
-   //horizontal pole 2
+   modelMatrix = popMatrix(); 
+  
+   var n = cylinder(gl,'sienna');
+  
+   //tree trunk
    pushMatrix(modelMatrix);
-   modelMatrix.translate(2, -1.17, -0.03);
-   modelMatrix.rotate(90,0,0,1);
-   modelMatrix.scale(0.05, 0.89, 0.05); // Scale
+   modelMatrix.translate(2.48, -1.6 , 1.2); 
+   modelMatrix.scale(0.08, 0.43, 0.1); // Scale
+   modelMatrix.rotate(90,1,0,0);
    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-   modelMatrix = popMatrix();
-
-    //pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.5, -1.3, -0.03);
-  modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3, -1.37, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //horizontal pole 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3, -1.17, -0.03);
-  modelMatrix.rotate(90,0,0,1);
-  modelMatrix.scale(0.05, 0.89, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-    //pole 2
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(-1.59, -1.6, 0.7);
-    modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-    //pole 2
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(-2.59, -1.6, 0.7);
-    modelMatrix.scale(0.1, 0.7, 0.05); // Scale
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-    //diagonal pole 1
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(-1.54, -1.38, 0.36);
-  modelMatrix.rotate(90,0,1,0);
-  modelMatrix.rotate(120,0,0,1);
-  modelMatrix.scale(0.05, 0.81, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-    //diagonal pole 2
-    pushMatrix(modelMatrix);
-    modelMatrix.translate(-2.6, -1.38, 0.36);
-    modelMatrix.rotate(90,0,1,0);
-    modelMatrix.rotate(120,0,0,1);
-    modelMatrix.scale(0.05, 0.81, 0.05); // Scale
-    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-    modelMatrix = popMatrix();
-
-
+   modelMatrix = popMatrix(); 
   
-
-        
-    /*Start of building 2 */
-
-
-
-    var n = cubes(gl,'grey');
-  //Base of building 2 (small one)
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.65, -1.93 , -0.98);
-  modelMatrix.scale(2.1, 0.1, 6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Left horizontal wall of building 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.7, -0.35 , -0.98);
-  modelMatrix.scale(0.08, 0.9, 6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Left vertical wall 1 of building 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.7, -0.9 , 0.7);
-  modelMatrix.scale(0.08, 2, 0.5); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Left vertical wall 2 of building 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.7, -0.9 , 1.9);
-  modelMatrix.scale(0.08, 2, 0.2); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Left vertical wall 3 of building 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.7, -0.9 , -2.27);
-  modelMatrix.scale(0.08, 2, 3.45); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Right wall of building 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(5.66, -0.9 , -0.98);
-  modelMatrix.scale(0.08, 2, 6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //Back wall of building 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.65, -0.9 , -3.95);
-  modelMatrix.scale(2, 2, 0.08); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-   //Front wall of building 2
-   pushMatrix(modelMatrix);
-   modelMatrix.translate(4.65, -0.9 , 1.98);
-   modelMatrix.scale(2, 2, 0.08); // Scale
-   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-   modelMatrix = popMatrix();
-
-  //Roof left part
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.20, 0.69 , -0.98);
-  modelMatrix.rotate(140,0,0,1);
-  modelMatrix.scale(0.08, 1.55, 6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();  
-
-  //Windows on roof
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.20, 0.69 , 0.5);
-  modelMatrix.scale(0.8, 1, 2); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();  
-
-  var n = cubes(gl,'blue');
-
-  //Windows on roof
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.95, 0.75, 1.25);
-  modelMatrix.rotate(-90,0,1,0);
-  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.95, 0.75, 0.75);
-  modelMatrix.rotate(-90,0,1,0);
-  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.95, 0.75, 0.25);
-  modelMatrix.rotate(-90,0,1,0);
-  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.95, 0.75, -0.25);
-  modelMatrix.rotate(-90,0,1,0);
-  modelMatrix.scale(0.4, 0.7, 0.4); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-
-
-  var n = cubes(gl,'grey');
-  //Roof right part
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(5.16, 0.69 , -0.98);
-  modelMatrix.rotate(-140,0,0,1);
-  modelMatrix.scale(0.08, 1.55, 6); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix(); 
-
-  var n = triangle(gl);
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.68 ,0.62 , 2.03);
-  modelMatrix.scale(2.06, 1.3, 1.9); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.68 ,0.62 , -3.98);
-  modelMatrix.rotate(180,0,1,0);  
-  modelMatrix.scale(2.06, 1.3, 1.9); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
+   var n = cylinder(gl,'peru');
   
-  var n = cubes(gl,'blue');
-  
-  //window 1
+  //tree leaf 1
   pushMatrix(modelMatrix);
-  modelMatrix.translate(3.64, -1.34, 1.35);
-  modelMatrix.scale(0.05, 1.2, 0.8); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //window 2
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(3.64, -1.34, -0.08);
-  modelMatrix.scale(0.05, 1.2, 0.9); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //window 3
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(4.7, -1.37, 2);
-  modelMatrix.scale(0.79, 1.2, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-
-  var n = cubes(gl,'grey');
-
- //Sign
- pushMatrix(modelMatrix);
- modelMatrix.translate(-4, -1.5 , 1.5);
- modelMatrix.scale(1, 1, 0.5); // Scale
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
-
- var n = cylinder(gl,'black');
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
-
-  //pole 1
-  pushMatrix(modelMatrix);
-  if (pole_length > 0.5){
-    pole_dir=-1.5;
-    pole_length=0.5;
-    barrier_end = false;
-   
-  }
-  if (pole_length <= 0.0){
-    pole_dir=-2;
-    pole_length=0;
-    barrier_end = true;
-  }
-  
- modelMatrix.translate(-2.5, pole_dir , 2.2); 
- modelMatrix.scale(0.1, pole_length, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
-
- //pole 2
- pushMatrix(modelMatrix);
- modelMatrix.translate(-2.5, pole_dir , 3); 
- modelMatrix.scale(0.1, pole_length, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
-
- //pole 3
- pushMatrix(modelMatrix);
- modelMatrix.translate(-2.5, pole_dir , 3.8); 
- modelMatrix.scale(0.1,pole_length, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
-
- var n = cylinder(gl,'sienna');
-
- //tree trunk
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.48, -1.6 , 1.2); 
- modelMatrix.scale(0.08, 0.43, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
-
- var n = cylinder(gl,'peru');
-
-//tree leaf 1
-pushMatrix(modelMatrix);
-modelMatrix.translate(2.23, -1.2, 1.2);
-modelMatrix.rotate(90,1,1,0);
-modelMatrix.scale(0.07, 0.07, 0.3); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//tree leaf 2
-pushMatrix(modelMatrix);
-modelMatrix.translate(2.34, -1.55, 1.2);
-modelMatrix.rotate(30,1,1,0);
-modelMatrix.rotate(90,1,1,0);
-modelMatrix.scale(0.07, 0.07, 0.2); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-
-//tree leaf 2
-pushMatrix(modelMatrix);
-modelMatrix.translate(2.6, -1.55, 1.25);
-modelMatrix.rotate(200,1,0,1);
-modelMatrix.rotate(120,1,1,0);
-modelMatrix.rotate(90,1,1,0);
-modelMatrix.scale(0.07, 0.07, 0.2); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-  //tree leaf 3
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.73, -1.2, 1.15);
-  modelMatrix.rotate(180,0,1,0);
+  modelMatrix.translate(2.23, -1.2, 1.2);
   modelMatrix.rotate(90,1,1,0);
   modelMatrix.scale(0.07, 0.07, 0.3); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
-
-  //tree leaf 4
+  
+  //tree leaf 2
   pushMatrix(modelMatrix);
-  modelMatrix.translate(2.42, -1.25, 1.29);
-  modelMatrix.rotate(50,0,1,0);
+  modelMatrix.translate(2.34, -1.55, 1.2);
+  modelMatrix.rotate(30,1,1,0);
   modelMatrix.rotate(90,1,1,0);
   modelMatrix.scale(0.07, 0.07, 0.2); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
-
-  //tree leaf 5
+  
+  
+  //tree leaf 2
   pushMatrix(modelMatrix);
-  modelMatrix.translate(2.47, -1.2, 1.05);
-  modelMatrix.rotate(270,0,1,0);
+  modelMatrix.translate(2.6, -1.55, 1.25);
+  modelMatrix.rotate(200,1,0,1);
+  modelMatrix.rotate(120,1,1,0);
   modelMatrix.rotate(90,1,1,0);
-  modelMatrix.scale(0.07, 0.07, 0.3); // Scale
+  modelMatrix.scale(0.07, 0.07, 0.2); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
- 
-
-
-var n = cubes(gl,'lime');
-
-pushMatrix(modelMatrix);
-modelMatrix.translate(-4.6, -1.93, 0.45);  
-modelMatrix.scale(1.5, 0.05, 0.8); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-var n = cubes(gl,'green');
-
-pushMatrix(modelMatrix);
-modelMatrix.translate(-4.6, -1.75, 0.45);  
-modelMatrix.scale(1.5, 0.3, 0.8); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-var n = cubes(gl,'light_yellow');
-
-//flower
-pushMatrix(modelMatrix);
-
-modelMatrix.translate(-5.2, -1.4, 0.5);
-
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-5.2, -1.4, 0.2);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-4.9, -1.4, 0.2);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-4.5, -1.4, 0.2);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-
-
-
-
-
-
-
-var n = cubes(gl,'lime');
-
-pushMatrix(modelMatrix);
-modelMatrix.translate(-3.2, -1.93, 0.45);  
-modelMatrix.scale(1, 0.05, 0.8); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-var n = cubes(gl,'green');
-
-pushMatrix(modelMatrix);
-modelMatrix.translate(-3.2, -1.75, 0.45);  
-modelMatrix.scale(1, 0.3, 0.8); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-var n = cubes(gl,'light_yellow');
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-3.7, -1.4, 0.5);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-3.1, -1.4, 0.2);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-3.25, -1.4, 0.35);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//flower
-pushMatrix(modelMatrix);
-modelMatrix.translate(-3.3, -1.4, 0.2);
-modelMatrix.rotate(45,0,0,1);
-modelMatrix.scale(0.06, 0.7, 0.06); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-var n = cubes(gl,'bird');
-if (car_dir > 4.7){
-  car_end = false;
- 
-}
-if (car_dir <= -5){
-
-  car_end = true;
-}
-
-
-
-
-//bird body
-pushMatrix(modelMatrix);
-//modelMatrix.translate(car_dir, -1.7, 3.5);
-modelMatrix.translate(-5, 2, 3.5);
-modelMatrix.scale(0.5, 0.5, 0.5); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//bird feather 1
-pushMatrix(modelMatrix);
-//modelMatrix.translate(car_dir, -1.7, 3.5);
-modelMatrix.translate(-5, 2, 3.8);
-modelMatrix.scale(0.3, 0.02, 0.3); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//bird feather 2
-pushMatrix(modelMatrix);
-//modelMatrix.translate(car_dir, -1.7, 3.5);
-modelMatrix.translate(-5, 2, 3.19);
-modelMatrix.scale(0.3, 0.02, 0.3); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-//mouth
-pushMatrix(modelMatrix);
-modelMatrix.translate(-4.5, 1.9, 3.35);
-modelMatrix.scale(0.3, 0.05, 0.3); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-var n = cylinder(gl,'sienna');
-
-pushMatrix(modelMatrix);
-//modelMatrix.translate(car_dir, -1.7, 3.5);
-modelMatrix.translate(-5.01, 1.64, 3.6);
-modelMatrix.rotate(90,1,0,0);
-modelMatrix.scale(0.1, 0.1, 0.13); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-pushMatrix(modelMatrix);
-//modelMatrix.translate(car_dir, -1.7, 3.5);
-modelMatrix.translate(-5.01, 1.64, 3.35);
-modelMatrix.rotate(90,1,0,0);
-modelMatrix.scale(0.1, 0.1, 0.13); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
-
-
-
-
+  
+    //tree leaf 3
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.73, -1.2, 1.15);
+    modelMatrix.rotate(180,0,1,0);
+    modelMatrix.rotate(90,1,1,0);
+    modelMatrix.scale(0.07, 0.07, 0.3); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //tree leaf 4
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.42, -1.25, 1.29);
+    modelMatrix.rotate(50,0,1,0);
+    modelMatrix.rotate(90,1,1,0);
+    modelMatrix.scale(0.07, 0.07, 0.2); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+  
+    //tree leaf 5
+    pushMatrix(modelMatrix);
+    modelMatrix.translate(2.47, -1.2, 1.05);
+    modelMatrix.rotate(270,0,1,0);
+    modelMatrix.rotate(90,1,1,0);
+    modelMatrix.scale(0.07, 0.07, 0.3); // Scale
+    drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+    modelMatrix = popMatrix();
+   
+    
+  var n = cubes(gl,'bird');
+  if (bird_dir > 3){
+    bird_end = false;
   }
+  if (bird_dir <= 0){
+    bird_end = true;
+  }
+  
+  if (bird_angle > 50){
+    bird_angle_flag=false;
+    bird_angle=50;
+  }
+  if (bird_angle < -50){
+    bird_angle_flag=true;
+    bird_angle=-50;
+  }
+  
+  
+  
+  //bird body
+  pushMatrix(modelMatrix);
+  //modelMatrix.translate(bird_dir, -1.7, 3.5);
+  modelMatrix.translate(-5, 2, bird_dir);
+  modelMatrix.scale(0.5, 0.5, 0.5); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+  
+  //bird feather 1
+  pushMatrix(modelMatrix);
+  //modelMatrix.translate(bird_dir, -1.7, 3.5);
+  modelMatrix.translate(-4.7, 2, bird_dir);
+  modelMatrix.rotate(bird_angle,0,0,1);
+  modelMatrix.scale(0.3, 0.02, 0.3); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+  
+  //bird feather 2
+  pushMatrix(modelMatrix);
+  //modelMatrix.translate(bird_dir, -1.7, 3.5);
+  modelMatrix.translate(-5.3, 2, bird_dir );
+  modelMatrix.rotate(90,0,1,0);
+  modelMatrix.rotate(bird_angle,1,0,0);
+  modelMatrix.scale(0.3, 0.02, 0.3); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
-  GrassTexture.image.src = 'textures/pave5.jpg';
-  GrassTexture1.image.src = 'textures/pavement.jpg';
+  var n = cubes(gl,'gold');
+  //mouth
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-5, 2, bird_dir+ 0.2);
+  modelMatrix.scale(0.3, 0.05, 0.3); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+  
+  //mouth
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-5, 2.12,bird_dir+0.2);
+  modelMatrix.rotate(bird_angle,1,0,0);
+  modelMatrix.scale(0.3, 0.05, 0.3); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+  
+  var n = cylinder(gl,'sienna');
+  
+  pushMatrix(modelMatrix);
+  //modelMatrix.translate(bird_dir, -1.7, 3.5);
+  modelMatrix.translate(-5.15- 0.01 , 1.64,bird_dir);
+  modelMatrix.rotate(90,1,0,0);
+  modelMatrix.scale(0.1, 0.1, 0.13); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
+  
+  pushMatrix(modelMatrix);
+  //modelMatrix.translate(bird_dir, -1.7, 3.5);
+  modelMatrix.translate(-4.85- 0.01, 1.64, bird_dir);
+  modelMatrix.rotate(90,1,0,0);
+  modelMatrix.scale(0.1, 0.1, 0.13); // Scale
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
 
 
@@ -2198,7 +2097,9 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
 }
 
 function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler, u_UseTextures) {
+
   pushMatrix(modelMatrix);
+
     // Pass the model matrix to the uniform variable
     gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
@@ -2217,7 +2118,6 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
     //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // Assign u_Sampler to TEXTURE0
     gl.uniform1i(u_Sampler, 0);
@@ -2227,9 +2127,10 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
 
     // Draw the textured cube
     gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-
+    
 
   modelMatrix = popMatrix();
+  gl.uniform1i(u_UseTextures, false);
 }
 
 var g_last = Date.now();
@@ -2262,12 +2163,28 @@ function down_Barriers() {
   pole_length -=0.008; 
 }
 
-function forward_car() {
-  car_dir += 0.06;
+function forward_bird() {
+  bird_dir += 0.1;
 }
 
-function backward_car() {
-  car_dir -= 0.06; 
+function backward_bird() {
+  bird_dir -= 0.1; 
+}
+
+function rotate_bird_up(){
+  bird_angle+=5;
+}
+
+function rotate_bird_down(){
+  bird_angle-=5;
+}
+
+function repeat_bird(){
+  if (bird_angle_flag == true){
+    rotate_bird_up();
+  }else{
+    rotate_bird_down();
+  }  
 }
 
 function repeat_barriers(){
@@ -2279,10 +2196,10 @@ function repeat_barriers(){
 }
 
 function repeat_car(){
-  if (car_end == true){
-    forward_car();
+  if (bird_end == true){
+    forward_bird();
   }else{
-    backward_car();
+    backward_bird();
   }  
 }
 

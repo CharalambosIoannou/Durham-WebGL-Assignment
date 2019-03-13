@@ -93,6 +93,7 @@ function main() {
   // Clear color and depth buffer
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  
   // Get the storage locations of uniform attributes
   var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
   var u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
@@ -120,7 +121,7 @@ function main() {
 
   // Calculate the view matrix and the projection matrix
   viewMatrix.setLookAt(0, 0, 10, 0, 0, -100, 0, 1, 0);
-  projMatrix.setPerspective(45, canvas.width/canvas.height, 1, 100);
+  projMatrix.setPerspective(100, canvas.width/canvas.height, 1, 100);
   // Pass the model, view, and projection matrix to the uniform variable respectively
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
@@ -133,6 +134,8 @@ function main() {
 
   document.onkeydown = function(ev){
     keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,u_LightColor,u_LightDirection);
+    draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures);
+
   };
 
   draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures);
@@ -598,9 +601,9 @@ function popMatrix() { // Retrieve the matrix from the array
 }
 
 function drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture,u_Sampler){
-  gl.uniform1i(u_UseTextures, false);
+  
       // Clear color and depth buffer
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   gl.uniform1i(u_isLighting, false); // Will not apply lighting 
 
@@ -627,7 +630,7 @@ function drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextur
     modelMatrix.rotate(g_yAngle, 0, 1, 0); // Rotate along y axis
     modelMatrix.rotate(g_xAngle, 1, 0, 0); // Rotate along x axis
        // CREATE THE GROUND
-       gl.uniform1i(u_UseTextures, true);
+       gl.uniform1i(u_UseTextures,true);
   var n = ground(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
@@ -639,12 +642,12 @@ function drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextur
     modelMatrix.scale(11.5, 0.05, 8); 
     loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture, u_Sampler, u_UseTextures,u_Sampler);
     modelMatrix = popMatrix();
-
-    gl.uniform1i(u_UseTextures, false);
+    gl.uniform1i(u_UseTextures,false);
 
 }
 
 function drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture,u_Sampler){
+  
   var n = cubes(gl);
   if (n < 0) {
     console.log('Failed to set the vertex information');
@@ -653,7 +656,7 @@ function drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTex
 
   /*Start of building 1 */
 
-
+   gl.uniform1i(u_UseTextures,true);
   //Base of building 1 (big one)
   pushMatrix(modelMatrix);
   modelMatrix.translate(-1.08, -1.8 , -2);
@@ -661,7 +664,6 @@ function drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTex
   loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, GrassTexture, u_Sampler, u_UseTextures,u_Sampler)
   modelMatrix = popMatrix();
 
-  gl.uniform1i(u_UseTextures, false);
   //First step from top
   pushMatrix(modelMatrix);
   modelMatrix.translate(-2.07, -1.75, 0.2);
@@ -682,6 +684,7 @@ function drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTex
   modelMatrix.scale(1, 0.09, 0.9); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
+
   gl.uniform1i(u_UseTextures, true);
 
   //Left wall 
@@ -946,18 +949,18 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures) {
 
   
   GrassTexture.image.onload = function() {
-    drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture);
+    drawGround(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture,u_Sampler);
   }
 
-  GrassTexture.image.src = 'textures/grass.jpg';
+  GrassTexture.image.src = 'textures/pave5.jpg';
 
 
 
   GrassTexture1.image.onload = function() {
-    drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture1);
+    drawBuildings(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,GrassTexture1,u_Sampler);
   }
 
-  GrassTexture1.image.src = 'textures/pavement.jpg';
+  GrassTexture1.image.src = 'textures/bricks.jpg';
 }
 
 function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
@@ -977,8 +980,17 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
   modelMatrix = popMatrix();
 }
 
-function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler, u_UseTextures) {
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler, u_UseTextures,u_Sampler) {
+  pushMatrix(modelMatrix);
+
+  // Pass the model matrix to the uniform variable
+  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+
+  // Calculate the normal transformation matrix and pass it to u_NormalMatrix
+  g_normalMatrix.setInverseOf(modelMatrix);
+  g_normalMatrix.transpose();
+  gl.uniformMatrix4fv(u_NormalMatrix, false, g_normalMatrix.elements);
+
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
 
   // Enable texture unit0
@@ -991,7 +1003,7 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, texture.image);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   // Assign u_Sampler to TEXTURE0
   gl.uniform1i(u_Sampler, 0);
@@ -1001,6 +1013,15 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
 
   // Draw the textured cube
   gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+  gl.uniform1i(u_UseTextures, false);
+  modelMatrix = popMatrix();
+
 }
+
+
+
+
+
+
 
 
