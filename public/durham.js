@@ -40,7 +40,7 @@ var FSHADER_SOURCE =
   '#ifdef GL_ES\n' +
   'precision mediump float;\n' +
   '#endif\n' +
-  'uniform bool u_UseTextures;\n' +    // Texture enable/disable flag    // Light color
+  'uniform bool u_UseTextures;\n' +    // Texture enable/disable barrier_end    // Light color
   'uniform vec3 u_LightPosition;\n' +  // Position of the light source
   'uniform vec3 u_AmbientLight;\n' +   // Ambient light color
   'varying vec3 v_Normal;\n' +
@@ -72,9 +72,12 @@ var original_side=0;
 var side_increment=0.5;
 var side_decrement=0.5;
 var currentAngle = 5.0;
-var pole_length = 0.5;
+var pole_length = 0.40;
 var pole_dir =-1.5 ;
 var rotating_door = 3.0; 
+var barrier_end = false;
+var car_dir = -5 ;
+var car_end = false;
 
 
 
@@ -137,12 +140,14 @@ function main() {
 
   var u_UseTextures = gl.getUniformLocation(gl.program, "u_UseTextures");
   if (!u_UseTextures) { 
-    console.log('Failed to get the storage location for texture map enable flag');
+    console.log('Failed to get the storage location for texture map enable barrier_end');
     return;
   }
-
-  var tick = function() {
+  
+   var tick = function() {    
     currentAngle = animate(currentAngle);  // Update the rotation angle
+    repeat_barriers();
+    repeat_car();
     draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);   // Draw the triangle
     requestAnimationFrame(tick, canvas);   // Request that the browser ?calls tick
   };
@@ -337,6 +342,18 @@ function cubes(gl,colour) {
     ]);
     }
 
+
+    if (colour == 'bird'){
+      var colors = new Float32Array([    // Colors
+        0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6, // v0-v1-v2-v3 front
+        0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,  // v0-v3-v4-v5 right
+        0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,  // v0-v5-v6-v1 up
+        0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,  // v1-v6-v7-v2 left
+        0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,  // v7-v4-v3-v2 down
+        0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,   0.466667, 0.533333, 0.6,  0.466667, 0.533333, 0.6,　 // v4-v7-v6-v5 back
+      ]);
+      }
+
   var normals = new Float32Array([    // Normal
     0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
     1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
@@ -454,17 +471,116 @@ function cylinder(gl,colour) {
 }
 
 if (colour == 'sienna'){
-  var colors = new Float32Array([    // Colors
-    0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 front
-      0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 right
-      0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
-      0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 left
-      0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 down
-      0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,　 // v4-v7-v6-v5 back
- ]);
+ 
+var colors = new Float32Array([    // Colors
+
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 front  
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 right
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v1-v2-v3 fr
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v3-v4-v5 ri
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v0-v5-v6-v1 up
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v1-v6-v7-v2 le
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v7-v4-v3-v2 do
+  0.627450,0.32156,0.17647,   0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647, 0.627450,0.32156,0.17647,   // v4-v7-v6-v5 ba
+]);
 
 }
 
+if (colour == 'peru'){
+ 
+  var colors = new Float32Array([    // Colors
+  
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 front  
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 right
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v1-v2-v3 fr
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v3-v4-v5 ri
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v0-v5-v6-v1 up
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v1-v6-v7-v2 le
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v7-v4-v3-v2 do
+    0.803921,0.52156,0.247058,   0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058, 0.803921,0.52156,0.247058,   // v4-v7-v6-v5 ba
+  ]);
+  
+  }
 
   var normals = new Float32Array([    // Normal
     0.0980173, 0.995185, 0, 0.0980173, 0.995185, 0, 0.0980173, 0.995185, 0, 0.0980173, 0.995185, 0, 0.290285, 0.95694, 0, 0.290285, 0.95694, 0, 0.290285, 0.95694, 0, 0.290285, 0.95694, 0, 0.471397, 0.881921, 0, 0.471397
@@ -610,12 +726,12 @@ function ground(gl) {
   ]);
   
   var texCoords = new Float32Array([
-    1.0, 1.0,    0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v0-v1-v2-v3 front
-    0.0, 1.0,    0.0, 0.0,   1.0, 0.0,   1.0, 1.0,  // v0-v3-v4-v5 right
-    1.0, 0.0,    1.0, 1.0,   0.0, 1.0,   0.0, 0.0,  // v0-v5-v6-v1 up
-    1.0, 1.0,    0.0, 1.0,   0.0, 0.0,   1.0, 0.0,  // v1-v6-v7-v2 left
+    1.0, 1.0,    0.0, 1.0,   0.0, 1.0,   1.0, 1.0,  // v0-v1-v2-v3 front
+    1.0, 1.0,    1.0, 1.0,   1.0, 0.0,   1.0, 0.0,  // v0-v3-v4-v5 right
+    1.0, 1.0,    1.0, 0.0,   0.0, 0.0,   0.0, 1.0,  // v0-v5-v6-v1 up
+    0.0, 1.0,    0.0, 0.0,   0.0, 0.0,   0.0, 1.0,  // v1-v6-v7-v2 left
     0.0, 0.0,    1.0, 0.0,   1.0, 1.0,   0.0, 1.0,  // v7-v4-v3-v2 down
-    0.0, 0.0,    1.0, 0.0,   1.0, 1.0,   0.0, 1.0   // v4-v7-v6-v5 back
+    1.0, 0.0,    0.0, 0.0,   0.0, 0.0,   1.0, 0.0   // v4-v7-v6-v5 back
   ]);
 
 
@@ -1776,12 +1892,16 @@ var n = cubes(gl,'grey');
   if (pole_length > 0.5){
     pole_dir=-1.5;
     pole_length=0.5;
+    barrier_end = false;
+   
   }
   if (pole_length <= 0.0){
     pole_dir=-2;
     pole_length=0;
+    barrier_end = true;
   }
- modelMatrix.translate(-2.8, pole_dir , 2.2); 
+  
+ modelMatrix.translate(-2.5, pole_dir , 2.2); 
  modelMatrix.scale(0.1, pole_length, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
@@ -1789,7 +1909,7 @@ var n = cubes(gl,'grey');
 
  //pole 2
  pushMatrix(modelMatrix);
- modelMatrix.translate(-2.8, pole_dir , 3); 
+ modelMatrix.translate(-2.5, pole_dir , 3); 
  modelMatrix.scale(0.1, pole_length, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
@@ -1797,104 +1917,80 @@ var n = cubes(gl,'grey');
 
  //pole 3
  pushMatrix(modelMatrix);
- modelMatrix.translate(-2.8, pole_dir , 3.8); 
+ modelMatrix.translate(-2.5, pole_dir , 3.8); 
  modelMatrix.scale(0.1,pole_length, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
  modelMatrix = popMatrix(); 
 
- var n = cubes(gl,'sienna');
+ var n = cylinder(gl,'sienna');
 
  //tree trunk
  pushMatrix(modelMatrix);
- modelMatrix.translate(2.5, -1.6 , 1.2); 
- modelMatrix.scale(0.08, 0.8, 0.1); // Scale
+ modelMatrix.translate(2.48, -1.6 , 1.2); 
+ modelMatrix.scale(0.08, 0.43, 0.1); // Scale
  modelMatrix.rotate(90,1,0,0);
  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
  modelMatrix = popMatrix(); 
 
- var n = cubes(gl,'peru');
- if (n < 0) {
-   console.log('Failed to set the vertex information');
-   return;
- }
+ var n = cylinder(gl,'peru');
 
- //tree leaf 1
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.2, -1.2, 1.2);
- modelMatrix.rotate(45,0,0,1);
- modelMatrix.scale(0.04, 0.7, 0.05); // Scale
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix();
+//tree leaf 1
+pushMatrix(modelMatrix);
+modelMatrix.translate(2.23, -1.2, 1.2);
+modelMatrix.rotate(90,1,1,0);
+modelMatrix.scale(0.07, 0.07, 0.3); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
 
- //tree leaf 2
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.8, -1.2, 1.2);
- modelMatrix.rotate(180,0,1,0);
- modelMatrix.rotate(45,0,0,1);
- modelMatrix.scale(0.04, 0.7, 0.05); // Scale
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix();
+//tree leaf 2
+pushMatrix(modelMatrix);
+modelMatrix.translate(2.34, -1.55, 1.2);
+modelMatrix.rotate(30,1,1,0);
+modelMatrix.rotate(90,1,1,0);
+modelMatrix.scale(0.07, 0.07, 0.2); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+
+//tree leaf 2
+pushMatrix(modelMatrix);
+modelMatrix.translate(2.6, -1.55, 1.25);
+modelMatrix.rotate(200,1,0,1);
+modelMatrix.rotate(120,1,1,0);
+modelMatrix.rotate(90,1,1,0);
+modelMatrix.scale(0.07, 0.07, 0.2); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
 
   //tree leaf 3
   pushMatrix(modelMatrix);
-  modelMatrix.translate(2.5, -1.2, 0.86);
-  modelMatrix.rotate(275,0,1,0);
-  modelMatrix.rotate(45,0,0,1);
-  modelMatrix.scale(0.04, 0.7, 0.05); // Scale
+  modelMatrix.translate(2.73, -1.2, 1.15);
+  modelMatrix.rotate(180,0,1,0);
+  modelMatrix.rotate(90,1,1,0);
+  modelMatrix.scale(0.07, 0.07, 0.3); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   //tree leaf 4
   pushMatrix(modelMatrix);
-  modelMatrix.translate(2.5, -1.2, 1.6);
-  modelMatrix.rotate(90,0,1,0);
-  modelMatrix.rotate(45,0,0,1);
-  modelMatrix.scale(0.04, 0.7, 0.05); // Scale
+  modelMatrix.translate(2.42, -1.25, 1.29);
+  modelMatrix.rotate(50,0,1,0);
+  modelMatrix.rotate(90,1,1,0);
+  modelMatrix.scale(0.07, 0.07, 0.2); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   //tree leaf 5
   pushMatrix(modelMatrix);
-  modelMatrix.translate(2.65, -1.2, 1.55);
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(45,0,0,1);
-  modelMatrix.scale(0.04, 0.7, 0.05); // Scale
+  modelMatrix.translate(2.47, -1.2, 1.05);
+  modelMatrix.rotate(270,0,1,0);
+  modelMatrix.rotate(90,1,1,0);
+  modelMatrix.scale(0.07, 0.07, 0.3); // Scale
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
+ 
 
-  //tree leaf 6
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.35, -1.2, 1.10);  
-  modelMatrix.rotate(200,0,1,0);
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(45,0,0,1);
-  modelMatrix.scale(0.04, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //tree leaf 7
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.63, -1.2, 1);  
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(45,0,0,1);
-  modelMatrix.scale(0.04, 0.7, 0.05); // Scale
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
-
-  //tree leaf 8
-  pushMatrix(modelMatrix);
-  modelMatrix.translate(2.33, -1.2, 1.5);  
-  //modelMatrix.setRotate(currentAngle, 1, 1, 0);
-  modelMatrix.rotate(180,0,1,0);
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(120,0,1,0);
-  modelMatrix.rotate(45,0,0,1);
-  modelMatrix.scale(0.04, 0.7, 0.05); // Scale
-  
-  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-  modelMatrix = popMatrix();
 
 var n = cubes(gl,'lime');
 
@@ -2006,11 +2102,74 @@ modelMatrix.scale(0.06, 0.7, 0.06); // Scale
 drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
 modelMatrix = popMatrix();
 
+var n = cubes(gl,'bird');
+if (car_dir > 4.7){
+  car_end = false;
+ 
+}
+if (car_dir <= -5){
+
+  car_end = true;
+}
+
+
+
+
+//bird body
+pushMatrix(modelMatrix);
+//modelMatrix.translate(car_dir, -1.7, 3.5);
+modelMatrix.translate(-5, 2, 3.5);
+modelMatrix.scale(0.5, 0.5, 0.5); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+//bird feather 1
+pushMatrix(modelMatrix);
+//modelMatrix.translate(car_dir, -1.7, 3.5);
+modelMatrix.translate(-5, 2, 3.8);
+modelMatrix.scale(0.3, 0.02, 0.3); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+//bird feather 2
+pushMatrix(modelMatrix);
+//modelMatrix.translate(car_dir, -1.7, 3.5);
+modelMatrix.translate(-5, 2, 3.19);
+modelMatrix.scale(0.3, 0.02, 0.3); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+//mouth
+pushMatrix(modelMatrix);
+modelMatrix.translate(-4.5, 1.9, 3.35);
+modelMatrix.scale(0.3, 0.05, 0.3); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+var n = cylinder(gl,'sienna');
+
+pushMatrix(modelMatrix);
+//modelMatrix.translate(car_dir, -1.7, 3.5);
+modelMatrix.translate(-5.01, 1.64, 3.6);
+modelMatrix.rotate(90,1,0,0);
+modelMatrix.scale(0.1, 0.1, 0.13); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+pushMatrix(modelMatrix);
+//modelMatrix.translate(car_dir, -1.7, 3.5);
+modelMatrix.translate(-5.01, 1.64, 3.35);
+modelMatrix.rotate(90,1,0,0);
+modelMatrix.scale(0.1, 0.1, 0.13); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+
 
 
   }
 
-  GrassTexture.image.src = 'textures/pavement.jpg';
+  GrassTexture.image.src = 'textures/pave5.jpg';
   GrassTexture1.image.src = 'textures/pavement.jpg';
 
 
@@ -2055,8 +2214,9 @@ function loadTexAndDraw(gl, u_ModelMatrix, u_NormalMatrix, n, texture, u_Sampler
 
     // Set the texture image
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, texture.image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
+    //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // Assign u_Sampler to TEXTURE0
@@ -2083,27 +2243,48 @@ function animate(angle) {
   return newAngle %= 360;
 }
 
+
 function up() {
   rotating_door += 10; 
-  pole_dir +=0.1;
-  pole_length +=0.1;
 }
 
 function down() {
-  rotating_door -= 10; 
-  pole_dir -=0.1;
-  pole_length -=0.1;
-  
+  rotating_door -= 10;   
 }
 
 function up_Barriers() {
-  pole_dir +=0.1;
-  pole_length +=0.1;
+  pole_dir +=0.008;
+  pole_length +=0.008;
 }
 
 function down_Barriers() {
-  pole_dir -=0.1;
-  pole_length -=0.1;
-  
+  pole_dir -=0.008;
+  pole_length -=0.008; 
 }
+
+function forward_car() {
+  car_dir += 0.06;
+}
+
+function backward_car() {
+  car_dir -= 0.06; 
+}
+
+function repeat_barriers(){
+  if (barrier_end == true){
+    up_Barriers();
+  }else{
+    down_Barriers();
+  }  
+}
+
+function repeat_car(){
+  if (car_end == true){
+    forward_car();
+  }else{
+    backward_car();
+  }  
+}
+
+
 
