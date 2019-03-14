@@ -1,5 +1,3 @@
-// Directional lighting demo: By Frederick Li
-// Vertex shader program
 var VSHADER_SOURCE =
   'attribute vec4 a_Position;\n' +
   'attribute vec4 a_Color;\n' +
@@ -184,7 +182,12 @@ var main = function () {
         loadTexture(gl, otherbuildingTexture, gl.TEXTURE4);
     };
 
-       
+    var buildingBaseTexture = gl.createTexture();
+    buildingBaseTexture.image = new Image();
+    buildingBaseTexture.image.src = 'textures/base1.jpg';
+    buildingBaseTexture.image.onload = function () {
+        loadTexture(gl, buildingBaseTexture, gl.TEXTURE5);
+    };
 
     var tick = function() {    
       currentAngle = animate(currentAngle);  // Update the rotation angle
@@ -195,14 +198,11 @@ var main = function () {
       document.onkeydown = function(ev){
         keydown(ev, gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,u_LightColor,u_LightDirection,u_ViewMatrix);
       };
-      drawWithTextures(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);
+      drawEnvirnoment(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);
       requestAnimationFrame(tick, canvas);   // Request that the browser ?calls tick
     };
     tick();   // Request that the browser ?calls tick
     
-  
-
-  
 
   }
 
@@ -257,7 +257,7 @@ var main = function () {
     break;
       default: return; // Skip drawing at no effective action
     }
-      //  drawWithTextures(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);
+      //  drawEnvirnoment(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle);
 
     // Draw the scene
    // draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures);
@@ -1049,7 +1049,7 @@ function popMatrix() { // Retrieve the matrix from the array
 }
 
 
-function drawWithTextures(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle) {
+function drawEnvirnoment(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseTextures,currentAngle) {
       // Clear color and depth buffer
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -1101,12 +1101,16 @@ function drawWithTextures(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_Use
         console.log('Failed to set the vertex information');
         return;
       }
-
+      gl.activeTexture(gl.TEXTURE5);
+      gl.uniform1i(u_Sampler, 5);
+      gl.uniform1i(u_UseTextures, true);// Scale
       pushMatrix(modelMatrix);
       modelMatrix.translate(-1.08, -1.8 , -2);
       modelMatrix.scale(9.3, 0.4, 4); // Scale
       drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
       modelMatrix = popMatrix();
+      gl.uniform1i(u_UseTextures, true);// Scale
+
 
       //Left wall 
       gl.activeTexture(gl.TEXTURE2);
@@ -2060,6 +2064,14 @@ modelMatrix.scale(0.5, 0.5, 0.5); // Scale
 drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
 modelMatrix = popMatrix();
 
+//bird head
+pushMatrix(modelMatrix);
+//modelMatrix.translate(bird_dir, -1.7, 3.5);
+modelMatrix.translate(-4.99, 2.35, bird_dir+0.35);
+modelMatrix.scale(0.3, 0.30, 0.3); // Scale
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
 //bird feather 1
 pushMatrix(modelMatrix);
 //modelMatrix.translate(bird_dir, -1.7, 3.5);
@@ -2082,16 +2094,16 @@ modelMatrix = popMatrix();
 var n = cubes(gl,'gold');
 //mouth
 pushMatrix(modelMatrix);
-modelMatrix.translate(-5, 2, bird_dir+ 0.2);
-modelMatrix.scale(0.3, 0.05, 0.3); // Scale
+modelMatrix.translate(-4.97, 2.25, bird_dir+ 0.65);
+modelMatrix.scale(0.2, 0.05, 0.1); // Scale
 drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
 modelMatrix = popMatrix();
 
 //mouth
 pushMatrix(modelMatrix);
-modelMatrix.translate(-5, 2.12,bird_dir+0.2);
+modelMatrix.translate(-4.97, 2.35,bird_dir+0.65);
 modelMatrix.rotate(bird_angle,1,0,0);
-modelMatrix.scale(0.3, 0.05, 0.3); // Scale
+modelMatrix.scale(0.2, 0.05, 0.1); // Scale
 drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
 modelMatrix = popMatrix();
 
@@ -2141,10 +2153,10 @@ function drawbox(gl, u_ModelMatrix, u_NormalMatrix, n) {
 
 
 
-function loadTexture(gl, texture, textureIndex) {
+function loadTexture(gl, texture, texNumb) {
   //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);  // Flip the image's y axis
   // Activate texture unit
-  gl.activeTexture(textureIndex);
+  gl.activeTexture(texNumb);
   // Bind the texture object to the target object
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
