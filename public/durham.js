@@ -1657,7 +1657,7 @@ function drawEnvirnoment(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting, u_UseT
 
   //tree leaf 2
   pushMatrix(modelMatrix);
-  modelMatrix.translate(2.28, -1.55, 1.2);
+  modelMatrix.translate(2.3, -1.55, 1.30);
   modelMatrix.rotate(30, 1, 1, 0);
   modelMatrix.rotate(90, 1, 1, 0);
   modelMatrix.scale(0.1, 0.1, 0.5);
