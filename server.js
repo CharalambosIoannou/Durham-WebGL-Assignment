@@ -5,10 +5,10 @@ var express = require('express')
 var app = express()
 app.use(express.static('public'));
 
+var port = process.env.PORT || 8090;
 
 
-
-app.listen(8090);
+app.listen(port);
 
 module.exports = app;
 console.log("Listening on: 127.0.0.1:8090\n");
