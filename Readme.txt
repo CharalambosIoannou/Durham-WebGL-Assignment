@@ -4,7 +4,7 @@ How to run the program:
 Assuming you have node.js installed:
 	1) Open a terminal inside the folder named “Submission” 
 	2) Type “npm start”
-	3) Open up a browser and navigate to “http://127.0.0.1:8090/durham.html” to view the program
+	3) Open up a browser and navigate to “http://127.0.0.1:8090/index.html” to view the program
 
 The program has been tested and can run on Google Chrome, Mozilla Firefox and Internet Explorer.
 
