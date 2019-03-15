@@ -6,9 +6,6 @@ Assuming you have node.js installed:
 	2) Type “npm start”
 	3) Open up a browser and navigate to “http://127.0.0.1:8090/index.html” to view the program
 
-The program has been tested and can run on Google Chrome, Mozilla Firefox and Internet Explorer.
-
-
 - - - - - - - - - - - - - - - - - - - -
 Main Application Features:
 - - - - - - - - - - - - - - - - - - - -
@@ -21,6 +18,6 @@ Main Application Features:
 
 * Another feature that the program has is that the large main building has a rotating door. 
   The door rotates by itself slowly, but the user can speed up or slow down the rotation speed of the door and even change its direction. 
-  Also, there is a bird which moves forwards and backwards and there are also 3 barriers in front of the main building which move up and down.
+  Also, there is a bird which moves forwards and backwards.
 
 * Concluding the sign at the left of the scene is the real representation of the actual sign.

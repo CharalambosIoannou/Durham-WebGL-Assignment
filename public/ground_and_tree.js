@@ -894,70 +894,70 @@ function draw(gl, u_ModelMatrix, u_NormalMatrix, u_isLighting) {
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
-  var n = cylinder(gl,'sienna');
+  var n = cubes(gl, 'sienna');
 
- //tree trunk
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.48, -1.6 , 1.2); 
- modelMatrix.scale(0.08, 0.43, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //tree trunk
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.48, -1.52, 1.2);
+  modelMatrix.scale(0.1, 1, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- var n = cylinder(gl,'peru');
+  var n = cubes(gl, 'peru');
 
-//tree leaf 1
-pushMatrix(modelMatrix);
-modelMatrix.translate(2.23, -1.2, 1.2);
-modelMatrix.rotate(90,1,1,0);
-modelMatrix.scale(0.07, 0.07, 0.3); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
+  //tree leaf 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.30, -1.2, 1.2);
+  modelMatrix.rotate(90, 1, 1, 0);
+  modelMatrix.scale(0.1, 0.1, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
-//tree leaf 2
-pushMatrix(modelMatrix);
-modelMatrix.translate(2.34, -1.55, 1.2);
-modelMatrix.rotate(30,1,1,0);
-modelMatrix.rotate(90,1,1,0);
-modelMatrix.scale(0.07, 0.07, 0.2); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
+  //tree leaf 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.28, -1.55, 1.2);
+  modelMatrix.rotate(30, 1, 1, 0);
+  modelMatrix.rotate(90, 1, 1, 0);
+  modelMatrix.scale(0.1, 0.1, 0.5);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
 
-//tree leaf 2
-pushMatrix(modelMatrix);
-modelMatrix.translate(2.6, -1.55, 1.25);
-modelMatrix.rotate(200,1,0,1);
-modelMatrix.rotate(120,1,1,0);
-modelMatrix.rotate(90,1,1,0);
-modelMatrix.scale(0.07, 0.07, 0.2); // Scale
-drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
-modelMatrix = popMatrix();
+  //tree leaf 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.6, -1.55, 1.25);
+  modelMatrix.rotate(200, 1, 0, 1);
+  modelMatrix.rotate(120, 1, 1, 0);
+  modelMatrix.rotate(90, 1, 1, 0);
+  modelMatrix.scale(0.1, 0.1, 0.4);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
   //tree leaf 3
   pushMatrix(modelMatrix);
   modelMatrix.translate(2.73, -1.2, 1.15);
-  modelMatrix.rotate(180,0,1,0);
-  modelMatrix.rotate(90,1,1,0);
-  modelMatrix.scale(0.07, 0.07, 0.3); // Scale
+  modelMatrix.rotate(180, 0, 1, 0);
+  modelMatrix.rotate(90, 1, 1, 0);
+  modelMatrix.scale(0.1, 0.1, 0.5);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   //tree leaf 4
   pushMatrix(modelMatrix);
   modelMatrix.translate(2.42, -1.25, 1.29);
-  modelMatrix.rotate(50,0,1,0);
-  modelMatrix.rotate(90,1,1,0);
-  modelMatrix.scale(0.07, 0.07, 0.2); // Scale
+  modelMatrix.rotate(50, 0, 1, 0);
+  modelMatrix.rotate(90, 1, 1, 0);
+  modelMatrix.scale(0.1, 0.1, 0.4);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
   //tree leaf 5
   pushMatrix(modelMatrix);
   modelMatrix.translate(2.47, -1.2, 1.05);
-  modelMatrix.rotate(270,0,1,0);
-  modelMatrix.rotate(90,1,1,0);
-  modelMatrix.scale(0.07, 0.07, 0.3); // Scale
+  modelMatrix.rotate(270, 0, 1, 0);
+  modelMatrix.rotate(90, 1, 1, 0);
+  modelMatrix.scale(0.1, 0.1, 0.4);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 

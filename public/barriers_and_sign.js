@@ -35,14 +35,33 @@ var FSHADER_SOURCE =
   '  gl_FragColor = v_Color;\n' +
   '}\n';
 
-  var modelMatrix = new Matrix4(); // The model matrix
-var viewMatrix = new Matrix4();  // The view matrix
-var projMatrix = new Matrix4();  // The projection matrix
-var g_normalMatrix = new Matrix4();  // Coordinate transformation matrix for normals
-
-var ANGLE_STEP = 3.0;  // The increments of rotation angle (degrees)
-var g_xAngle = 0.0;    // The rotation x angle (degrees)
-var g_yAngle = 0.0;    // The rotation y angle (degrees)
+  var modelMatrix = new Matrix4();
+  var viewMatrix = new Matrix4();
+  var projMatrix = new Matrix4();
+  var g_normalMatrix = new Matrix4();
+  
+  var ANGLE_STEP = 3.0; // The increments of rotation angle (degrees)
+  var g_xAngle = 0.0; // The rotation x angle (degrees)
+  var g_yAngle = 0.0; // The rotation y angle (degrees)
+  var original_zoom = 16; //used for zooming in and out 
+  var zoom_increment = 1; //value by which zooming is increased
+  var zoom_decrement = 1;
+  var original_side = 0; //value for moving left and right
+  var side_increment = 0.5;
+  var side_decrement = 0.5;
+  //used for rotating the door
+  var currentAngle = 5.0;
+  //used for making the barriers move up and down
+  var pole_length = 0.90;
+  var pole_dir = -1.5;
+  var rotating_door = 3.0;
+  var barrier_end = false;
+  //used for making the bird moving
+  var bird_dir = 3.5;
+  var bird_end = false;
+  var bird_angle = 2;
+  var bird_angle_flag = false;
+  
 
 function main() {
   // Retrieve <canvas> element
@@ -814,36 +833,47 @@ modelMatrix.scale(1, 1, 0.5); // Scale
 drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
 modelMatrix = popMatrix();   
 
- var n = cylinder(gl,'black');
-  if (n < 0) {
-    console.log('Failed to set the vertex information');
-    return;
-  }
+var n = cubes(gl, 'black');
+if (n < 0) {
+  console.log('Failed to set the vertex information');
+  return;
+}
 
-  //pole 1
-  pushMatrix(modelMatrix);
- 
- modelMatrix.translate(-2.5, -1.5 , 2.2); 
- modelMatrix.scale(0.1, 0.40, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+//pole 1
+pushMatrix(modelMatrix);
+if (pole_length > 0.91) {
+  pole_dir = -0.9;
+  pole_length = 0.91;
+  barrier_end = false;
 
- //pole 2
- pushMatrix(modelMatrix);
- modelMatrix.translate(-2.5, -1.5 , 3); 
- modelMatrix.scale(0.1, 0.40, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+}
+if (pole_length <= 0.02 ) {
+  pole_dir = -2.3;
+  pole_length = 0;
+  barrier_end = true;
+}
 
- //pole 3
- pushMatrix(modelMatrix);
- modelMatrix.translate(-2.5, -1.5 , 3.8); 
- modelMatrix.scale(0.1,0.40, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+modelMatrix.translate(-2.5, pole_dir, 2.4);
+modelMatrix.scale(0.2, pole_length, 0.2);
+//modelMatrix.rotate(90, 1, 0, 0);
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+//pole 2
+pushMatrix(modelMatrix);
+modelMatrix.translate(-2.5, pole_dir, 3.1);
+modelMatrix.scale(0.2, pole_length, 0.2);
+//modelMatrix.rotate(90, 1, 0, 0);
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
+
+//pole 3
+pushMatrix(modelMatrix);
+modelMatrix.translate(-2.5, pole_dir, 3.9);
+modelMatrix.scale(0.2, pole_length, 0.2);
+//modelMatrix.rotate(90, 1, 0, 0);
+drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+modelMatrix = popMatrix();
  
 }
 

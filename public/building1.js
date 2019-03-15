@@ -934,93 +934,91 @@ modelMatrix = popMatrix();
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
-  var n = cubes(gl,'saddle_brown');
+  var n = cubes(gl, 'saddle_brown');
 
- //Chimney right
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.08, 4.18, -1.57);
- modelMatrix.scale(0.5, 1, 1); // Scale
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix();
+  //Chimney right
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.08, 4.18, -1.57);
+  modelMatrix.scale(0.5, 1, 1);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- var n = cylinder(gl,'black');
+  var n = cubes(gl, 'black');
 
- //cyl 1
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.08, 4.85, -1.9);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.08, 4.85, -1.9);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- //cyl 2
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.08, 4.85, -1.65);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.08, 4.85, -1.65);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- //cyl 3
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.08, 4.85, -1.40);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 3
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.08, 4.85, -1.40);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- //cyl 4
- pushMatrix(modelMatrix);
- modelMatrix.translate(2.08, 4.85, -1.17);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 4
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(2.08, 4.85, -1.17);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
-
-
-  var n = cubes(gl,'saddle_brown');
+  var n = cubes(gl, 'saddle_brown');
 
   //Chimney left
   pushMatrix(modelMatrix);
   modelMatrix.translate(-1.08, 4.18, -1.57);
-  modelMatrix.scale(0.5, 1, 1); // Scale
+  modelMatrix.scale(0.5, 1, 1);
   drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
   modelMatrix = popMatrix();
 
-  var n = cylinder(gl,'black');
+  var n = cubes(gl, 'black');
 
- //cyl 1
- pushMatrix(modelMatrix);
- modelMatrix.translate(-1.08, 4.85, -1.9);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 1
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.9);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- //cyl 2
- pushMatrix(modelMatrix);
- modelMatrix.translate(-1.08, 4.85, -1.65);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 2
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.65);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- //cyl 3
- pushMatrix(modelMatrix);
- modelMatrix.translate(-1.08, 4.85, -1.40);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 3
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.40);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
- //cyl 4
- pushMatrix(modelMatrix);
- modelMatrix.translate(-1.08, 4.85, -1.17);
- modelMatrix.scale(0.1, 0.3, 0.1); // Scale
- modelMatrix.rotate(90,1,0,0);
- drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
- modelMatrix = popMatrix(); 
+  //cyl 4
+  pushMatrix(modelMatrix);
+  modelMatrix.translate(-1.08, 4.85, -1.17);
+  modelMatrix.scale(0.3, 0.3, 0.1);
+  modelMatrix.rotate(90, 1, 0, 0);
+  drawbox(gl, u_ModelMatrix, u_NormalMatrix, n);
+  modelMatrix = popMatrix();
 
   var n = cubes(gl,'blue');
  //window starting top right and move to the left
